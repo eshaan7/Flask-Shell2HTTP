@@ -1,16 +1,22 @@
 # Flask-Shell2HTTP
 
-A minimalist REST API wrapper for python's subprocess API.<br/>
-Execute shell commands asynchronously and safely from flask's endpoints.
+[![flask-shell2http on pypi](https://img.shields.io/pypi/v/flask-shell2http)](https://pypi.org/project/Flask-Shell2HTTP/)
+
+A minimalist [Flask](https://github.com/pallets/flask) extension that serves as a REST API wrapper for python's subprocess API.<br/>
+
+- **Convert any command-line tool into a REST API service.**
+- Execute shell commands asynchronously and safely from flask's endpoints.
 
 Inspired by the work of awesome folks over at [msoap/shell2http](https://github.com/msoap/shell2http).
 
-## You can use this for
+## Use Cases
 
-- Set a script that runs on a succesful POST request to an endpoint of your choice. See [Example code](examples/run_script.py)
-- Map a base command to an endpoint and passing dynamic arguments to it. See [Example code](examples/basic.py)
-- Can also process uploaded files. See [Example code](examples/multiple_files.py)
-- Choose to run a command asynchronously or not. (upcoming feature)
+- Set a script that runs on a succesful POST request to an endpoint of your choice. See [Example code](examples/run_script.py).
+- Map a base command to an endpoint and pass dynamic arguments to it. See [Example code](examples/basic.py).
+- Can also process multiple uploaded files in one command. See [Example code](examples/multiple_files.py).
+- Currently, all commands are run asynchronously, so result is not available directly. An option would be provided for this in future release.
+
+> Note: This module is primarily meant for running long-running shell commands/scripts (like nmap, code-analysis' tools) in background and getting the result at a later time.
 
 ## Quick Start
 
@@ -23,7 +29,7 @@ Inspired by the work of awesome folks over at [msoap/shell2http](https://github.
 #### Install
 
 ```bash
-$ pip install flask_shell2http flask_executor
+$ pip install flask flask_shell2http
 ```
 
 #### Example
@@ -93,8 +99,8 @@ Returns result in JSON,
 
 ## Why?
 
-This was made to integrate various command-line tools easily with [IntelOwl](https://github.com/intelowlproject/IntelOwl).
+This was initially made to integrate various command-line tools easily with [IntelOwl](https://github.com/intelowlproject/IntelOwl).
 
-## Various examples
+## Example usage
 
-You can find various examples under [examples](examples/)
+You can find various examples under [examples](examples/).
