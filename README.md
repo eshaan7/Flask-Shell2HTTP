@@ -5,7 +5,8 @@
 A minimalist [Flask](https://github.com/pallets/flask) extension that serves as a REST API wrapper for python's subprocess API.<br/>
 
 - **Convert any command-line tool into a REST API service.**
-- Execute shell commands asynchronously and safely from flask's endpoints.
+- Execute pre-defined shell commands asynchronously and securely from flask's endpoints.
+- Designed for development, prototyping or remote control.
 
 Inspired by the work of awesome folks over at [msoap/shell2http](https://github.com/msoap/shell2http).
 
@@ -14,6 +15,7 @@ Inspired by the work of awesome folks over at [msoap/shell2http](https://github.
 - Set a script that runs on a succesful POST request to an endpoint of your choice. See [Example code](examples/run_script.py).
 - Map a base command to an endpoint and pass dynamic arguments to it. See [Example code](examples/basic.py).
 - Can also process multiple uploaded files in one command. See [Example code](examples/multiple_files.py).
+- This is useful for internal docker-to-docker communications if you have lots of different binaries. See [real-life example](https://github.com/intelowlproject/IntelOwl/blob/develop/integrations/peframe/app.py).
 - Currently, all commands are run asynchronously, so result is not available directly. An option would be provided for this in future release.
 
 > Note: This module is primarily meant for running long-running shell commands/scripts (like nmap, code-analysis' tools) in background and getting the result at a later time.
