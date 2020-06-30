@@ -5,12 +5,15 @@ import tempfile
 from collections import OrderedDict
 
 # web imports
+from flask import safe_join
 from werkzeug.utils import secure_filename
 from http import HTTPStatus
 from flask_executor import Executor
 
 # lib imports
-from .helpers import list_replace, calc_hash
+from .helpers import list_replace, calc_hash, get_logger
+
+logger = get_logger()
 
 
 class Report:
@@ -18,6 +21,7 @@ class Report:
     Report class to store the command's result.
     Internal use only.
     """
+
     def __init__(self, md5, report, error, start_time, status="failed"):
         self.start_time = start_time
         self.end_time = time.time()
@@ -38,6 +42,7 @@ class JobExecutor:
     A high-level API for flask_executor.Executor() to allow common operations.
     Internal use only.
     """
+
     executor: Executor
 
     @staticmethod
@@ -70,8 +75,9 @@ class JobExecutor:
         :returns:
             A ConcurrentFuture object where future.result = Report()
         """
+        job_key: str = self.make_key(md5)
+        start_time = time.time()
         try:
-            start_time = time.time()
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             stdout = stdout.decode("ascii")
@@ -84,6 +90,7 @@ class JobExecutor:
                 status = "failed"
 
             stdout = {"result": stdout}
+            logger.info(f"Job: '{job_key}' finished with status: '{status}'.")
             return Report(
                 md5=md5,
                 report=stdout,
@@ -93,11 +100,13 @@ class JobExecutor:
             )
 
         except Exception as e:
+            str_err = str(e)
             self.cancel_job(md5)
+            logger.error(f"Job: '{job_key}' failed. Reason: {str_err}.")
             return Report(
                 md5=md5,
                 report=None,
-                error=str(e),
+                error=str_err,
                 start_time=start_time,
                 status="failed",
             )
@@ -107,6 +116,7 @@ class ReportStore:
     """
     Acts as a data-store for command's results.
     """
+
     __results: "OrderedDict[str, Report]" = OrderedDict()
 
     def save_result(self, future) -> None:
@@ -129,6 +139,7 @@ class RequestParser:
     Utility class to parse incoming POST request data into meaningful arguments.
     Internal use Only.
     """
+
     @staticmethod
     def __parse_multipart_req(args: list, files):
         # Check if file part exists
@@ -155,15 +166,16 @@ class RequestParser:
             req_file = files.get(fname)
             filename = secure_filename(req_file.filename)
             # calc file location
-            f_loc = __import__("os").path.join(tmpdir, filename)
+            f_loc = safe_join(tmpdir, filename)
             # save file into temp directory
             req_file.save(f_loc)
             # replace @filename with it's file location in system
             list_replace(args, "@" + fname, f_loc)
 
+        logger.debug(f"Request files saved under temp directory: '{tmpdir}'")
         return args, tmpdir
 
-    def parse_req(self, request):
+    def parse_req(self, request) -> (str, str):
         if request.is_json:
             # request does not contain a file
             args = request.json.get("args", [])
@@ -178,12 +190,18 @@ class RequestParser:
             # i.e. just run-script
             args = []
 
-        args.insert(0, self.command_name)
-        return args, calc_hash(args)
+        cmd: list = self.command_name.split(" ")
+        cmd.extend(args)
+        return cmd, calc_hash(cmd)
 
-    def cleanup_temp_dir(self, _):
+    def cleanup_temp_dir(self, _) -> None:
         if hasattr(self, "tmpdir"):
-            __import__("shutil").rmtree(self.tmpdir)
+            try:
+                __import__("shutil").rmtree(self.tmpdir)
+                logger.debug(f"temp directory: '{self.tmpdir}' was deleted.")
+                del self.tmpdir
+            except Exception:
+                logger.debug(f"Failed to clear temp directory: '{self.tmpdir}'.")
 
-    def __init__(self, command_name):
+    def __init__(self, command_name) -> None:
         self.command_name = command_name
