@@ -1,8 +1,8 @@
 # Flask-Shell2HTTP
 
 [![CodeFactor](https://www.codefactor.io/repository/github/eshaan7/flask-shell2http/badge)](https://www.codefactor.io/repository/github/eshaan7/flask-shell2http)
-<a href="https://lgtm.com/projects/g/eshaan7/flask-shell2http/context:python">
-  <img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/eshaan7/flask-shell2http.svg?logo=lgtm&logoWidth=18"/>
+<a href="https://lgtm.com/projects/g/Eshaan7/Flask-Shell2HTTP/context:python">
+  <img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/Eshaan7/Flask-Shell2HTTP.svg?logo=lgtm&logoWidth=18"/>
 </a>
 [![flask-shell2http on pypi](https://img.shields.io/pypi/v/flask-shell2http)](https://pypi.org/project/Flask-Shell2HTTP/)
 
@@ -29,7 +29,7 @@ Inspired by the work of awesome folks over at [msoap/shell2http](https://github.
 
 [![Documentation Status](https://readthedocs.org/projects/flask-shell2http/badge/?version=latest)](https://flask-shell2http.readthedocs.io/en/latest/?badge=latest)
 
-Read the [Quickstart](https://flask-shell2http.readthedocs.io/quickstart.html) 
+Read the [Quickstart](https://flask-shell2http.readthedocs.io/en/latest/Quickstart.html) 
 from the [documentation](https://flask-shell2http.readthedocs.io/) to get started!
 
 ## Why?

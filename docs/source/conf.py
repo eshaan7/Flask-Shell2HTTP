@@ -26,7 +26,7 @@ copyright = "2020, Eshaan Bansal"
 author = "Eshaan Bansal"
 
 # The full version, including alpha/beta/rc tags
-release = "1.1.1"
+release = "1.1.2"
 
 
 # -- General configuration ---------------------------------------------------
@@ -64,7 +64,7 @@ html_theme = "flask"
 
 html_context = {
     "project_links": [
-        ProjectLink("Donate To the Author", "https://paypal.me/eshaanbansal"),
+        ProjectLink("Donate To The Author", "https://paypal.me/eshaanbansal"),
         ProjectLink(
             "Flask-Shell2HTTP Website", "https://flask-shell2http.readthedocs.io/"
         ),
@@ -83,7 +83,7 @@ singlehtml_sidebars = {"index": ["project.html", "localtoc.html"]}
 html_static_path = ["_static"]
 # html_favicon = "_static/flask-icon.png"
 # html_logo = "_static/flask-icon.png"
-html_title = f"Flask Documentation ({release})"
+html_title = f"Flask-Shell2HTTP Documentation ({release})"
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
