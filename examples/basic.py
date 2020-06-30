@@ -1,5 +1,7 @@
 # system imports
 import requests
+import logging
+import sys
 
 # web imports
 from flask import Flask
@@ -8,6 +10,15 @@ from flask_shell2http import Shell2HTTP
 
 # Flask application instance
 app = Flask(__name__)
+
+# Logging
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger("flask_shell2http")
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 # application factory
 executor = Executor(app)
@@ -33,10 +44,9 @@ def test():
     print(resp_data)
     key = resp_data["key"]
     if key:
-        resp2 = requests.get(f"{url}?key={key}")
-        return resp2.json()
-    else:
-        return resp_data
+        report = requests.get(f"{url}?key={key}")
+        return report.json()
+    return resp_data
 
 
 # Application Runner
