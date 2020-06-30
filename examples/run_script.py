@@ -30,10 +30,9 @@ def test():
     print(resp_data)
     key = resp_data["key"]
     if key:
-        resp2 = requests.get(f"{url}?key={key}")
-        return resp2.json()
-    else:
-        return resp_data
+        report = requests.get(f"{url}?key={key}")
+        return report.json()
+    return resp_data
 
 
 # Application Runner
