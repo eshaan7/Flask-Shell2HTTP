@@ -36,27 +36,27 @@ class shell2httpAPI(MethodView):
 
     def get(self):
         try:
-            md5: str = request.args.get("key")
-            logger.info(f"Report requested for key:'{md5}'.")
-            if not md5:
+            key: str = request.args.get("key")
+            logger.info(f"Report requested for key:'{key}'.")
+            if not key:
                 raise Exception("No key provided in arguments.")
             # check if job has been finished
-            future = self.executor.get_job(md5)
+            future = self.executor.get_job(key)
             if future:
                 if not future.done:
-                    return make_response(jsonify(status="running", md5=md5), 200)
+                    return make_response(jsonify(status="running", key=key), 200)
 
                 # pop future object since it has been finished
-                self.executor.pop_job(md5)
+                self.executor.pop_job(key)
 
             # if yes, get result from store
-            report = self.store.get_one(md5)
+            report = self.store.get_one(key)
             if not report:
-                raise Exception(f"Report does not exist for key:{md5}.")
+                raise Exception(f"Report does not exist for key:{key}.")
 
-            resp = report.to_json()
+            resp = report.to_dict()
             logger.debug(f"Requested report: {resp}")
-            return make_response(resp, HTTPStatus.OK)
+            return make_response(jsonify(resp), HTTPStatus.OK)
 
         except Exception as e:
             logger.exception(e)
@@ -66,12 +66,12 @@ class shell2httpAPI(MethodView):
         try:
             logger.info(f"Received request for endpoint: '{request.url_rule}'.")
             # Check if command is correct and parse it
-            cmd, md5 = self.request_parser.parse_req(request)
+            cmd, key = self.request_parser.parse_req(request)
 
             # run executor job in background
-            job_key = JobExecutor.make_key(md5)
+            job_key = JobExecutor.make_key(key)
             future = self.executor.new_job(
-                future_key=job_key, fn=self.executor.run_command, cmd=cmd, md5=md5
+                future_key=job_key, fn=self.executor.run_command, cmd=cmd, key=key
             )
             # callback that adds result to store
             future.add_done_callback(self.store.save_result)
@@ -80,7 +80,7 @@ class shell2httpAPI(MethodView):
 
             logger.info(f"Job: '{job_key}' added to queue for command: {cmd}")
             return make_response(
-                jsonify(status="running", key=md5), HTTPStatus.ACCEPTED,
+                jsonify(status="running", key=key), HTTPStatus.ACCEPTED,
             )
 
         except Exception as e:

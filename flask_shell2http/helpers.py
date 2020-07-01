@@ -17,10 +17,12 @@ def list_replace(lst: list, old, new) -> None:
 def calc_hash(lst: list) -> str:
     """
     Internal use only.
-    Calculates md5sum of given command with it's byte-string.
+    Calculates sha1sum of given command with it's byte-string.
+    This is for non-cryptographic purpose,
+    that's why a faster and insecure hashing algorithm is chosen.
     """
     to_hash = " ".join(lst).encode("ascii")
-    return __import__("hashlib").md5(to_hash).hexdigest()
+    return __import__("hashlib").sha1(to_hash).hexdigest()
 
 
 def get_logger() -> logging.Logger:
