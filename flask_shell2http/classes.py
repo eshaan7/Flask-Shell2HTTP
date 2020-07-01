@@ -22,18 +22,17 @@ class Report:
     Internal use only.
     """
 
-    def __init__(self, md5, report, error, start_time, status="failed"):
+    def __init__(self, key, report, error, start_time, status="failed"):
         self.start_time = start_time
         self.end_time = time.time()
         self.process_time = self.end_time - self.start_time
-        self.md5 = md5
+        self.key = key
         self.report = report
         self.error = error
         self.status = status
 
-    def to_json(self):
+    def to_dict(self):
         resp = self.__dict__
-        # resp["report"] = json.loads(self.report)
         return resp
 
 
@@ -46,28 +45,28 @@ class JobExecutor:
     executor: Executor
 
     @staticmethod
-    def make_key(md5) -> str:
-        return f"job_{md5}"
+    def make_key(k) -> str:
+        return f"job_{k}"
 
-    def get_job(self, md5):
-        key = self.make_key(md5)
+    def get_job(self, k):
+        key = self.make_key(k)
         return self.executor.futures._futures.get(key, None)
 
-    def cancel_job(self, md5):
-        key = self.make_key(md5)
+    def cancel_job(self, k):
+        key = self.make_key(k)
         return self.executor.futures._futures.get(key).cancel()
 
     def new_job(self, **kwargs):
         return self.executor.submit_stored(**kwargs)
 
-    def pop_job(self, md5):
-        key = self.make_key(md5)
+    def pop_job(self, k):
+        key = self.make_key(k)
         return self.executor.futures.pop(key)
 
     def __init__(self, executor) -> None:
         self.executor = executor
 
-    def run_command(self, cmd, md5) -> Report:
+    def run_command(self, cmd, key) -> Report:
         """
         This function is called by the executor to run given command
         using a subprocess asynchronously.
@@ -75,7 +74,7 @@ class JobExecutor:
         :returns:
             A ConcurrentFuture object where future.result = Report()
         """
-        job_key: str = self.make_key(md5)
+        job_key: str = self.make_key(key)
         start_time = time.time()
         try:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -89,10 +88,9 @@ class JobExecutor:
             else:
                 status = "failed"
 
-            stdout = {"result": stdout}
             logger.info(f"Job: '{job_key}' finished with status: '{status}'.")
             return Report(
-                md5=md5,
+                key=key,
                 report=stdout,
                 error=stderr,
                 start_time=start_time,
@@ -101,10 +99,10 @@ class JobExecutor:
 
         except Exception as e:
             str_err = str(e)
-            self.cancel_job(md5)
+            self.cancel_job(key)
             logger.error(f"Job: '{job_key}' failed. Reason: {str_err}.")
             return Report(
-                md5=md5,
+                key=key,
                 report=None,
                 error=str_err,
                 start_time=start_time,
@@ -125,7 +123,7 @@ class ReportStore:
         """
         # get job result from future
         job_res = future.result()
-        self.__results.update({job_res.md5: job_res})
+        self.__results.update({job_res.key: job_res})
 
     def get_all(self):
         return self.__results
