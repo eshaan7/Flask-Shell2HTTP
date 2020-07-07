@@ -39,7 +39,7 @@ With <10 lines of code, we succesfully mapped the shell command `echo` to the en
 This section demonstrates how we can now call/ execute commands over HTTP that we just mapped in the [example](#example-program) above.
 
 ```bash
-$ curl -X POST -d '{"args": ["Hello", "World!"]}' http://localhost:4000/commands/saythis
+$ curl -X POST -H 'Content-Type: application/json' -d '{"args": ["Hello", "World!"]}' http://localhost:4000/commands/saythis
 ```
 
 <details><summary>or using python's requests module,</summary>
