@@ -12,10 +12,11 @@ Here's a snippet of code that shows how you can access this extension's logger o
 import logging
 # get the flask_shell2http logger
 logger = logging.getLogger("flask_shell2http")
-# log messages of severity DEBUG or lower to the console
+# create new handler
 handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+# log messages of severity DEBUG or lower to the console
+logger.setLevel(logging.DEBUG)  # this is really important!
 ```
 
 Please consult the Flask's official docs on 

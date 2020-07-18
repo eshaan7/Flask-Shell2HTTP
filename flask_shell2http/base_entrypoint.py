@@ -2,6 +2,7 @@
 from collections import OrderedDict
 
 # lib imports
+from .classes import JobExecutor
 from .api import shell2httpAPI
 from .helpers import get_logger
 
@@ -49,7 +50,7 @@ class Shell2HTTP(object):
            https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/
         """
         self.app = app
-        self.__executor = executor
+        self.__executor = JobExecutor(executor)
         self.__init_extension()
 
     def __init_extension(self) -> None:
@@ -84,26 +85,33 @@ class Shell2HTTP(object):
                 endpoint="myawesomescript", command_name="./fuxsocy.py"
             )
         """
-        if not self.__commands.get(endpoint):
-            url = self.__construct_route(endpoint)
-            self.app.add_url_rule(
-                url,
-                view_func=shell2httpAPI.as_view(
-                    command_name, command_name=command_name, executor=self.__executor
-                ),
+        uri = self.__construct_route(endpoint)
+        # make sure the given endpoint is not already registered
+        cmd_already_exists = self.__commands.get(uri)
+        if cmd_already_exists:
+            logger.error(
+                "Failed to register since given endpoint: "
+                f"'{endpoint}' already maps to command: '{cmd_already_exists}'."
             )
-            self.__commands.update({command_name: url})
-            logger.info(
-                f"New endpoint: '{endpoint}' registered for command: '{command_name}'."
-            )
+            return None
 
-    def get_registered_commands(self):
+        # else, add new URL rule
+        self.app.add_url_rule(
+            uri,
+            view_func=shell2httpAPI.as_view(
+                command_name, command_name=command_name, job_executor=self.__executor,
+            ),
+        )
+        self.__commands.update({uri: command_name})
+        logger.info(f"New URI: '{uri}' registered for command: '{command_name}'.")
+
+    def get_registered_commands(self) -> "OrderedDict[str, str]":
         """
         Most of the time you won't need this since
         Flask provides a ``Flask.url_map`` attribute.
 
         Returns:
-            OrderedDict i.e. mapping of registered commands and their URLs.
+            OrderedDict[uri, command] i.e. mapping of registered commands and their URLs.
         """
         return self.__commands
 

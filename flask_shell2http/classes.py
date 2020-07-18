@@ -2,7 +2,9 @@
 import time
 import subprocess
 import tempfile
+import shutil
 from collections import OrderedDict
+from typing import List, Dict
 
 # web imports
 from flask import safe_join
@@ -74,7 +76,6 @@ class JobExecutor:
         :returns:
             A ConcurrentFuture object where future.result = Report()
         """
-        job_key: str = self.make_key(key)
         start_time = time.time()
         try:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -88,7 +89,7 @@ class JobExecutor:
             else:
                 status = "failed"
 
-            logger.info(f"Job: '{job_key}' finished with status: '{status}'.")
+            logger.info(f"Job: '{key}' --> finished with status: '{status}'.")
             return Report(
                 key=key,
                 report=stdout,
@@ -100,7 +101,7 @@ class JobExecutor:
         except Exception as e:
             str_err = str(e)
             self.cancel_job(key)
-            logger.error(f"Job: '{job_key}' failed. Reason: {str_err}.")
+            logger.error(f"Job: '{key}' --> failed. Reason: {str_err}.")
             return Report(
                 key=key,
                 report=None,
@@ -128,8 +129,11 @@ class ReportStore:
     def get_all(self):
         return self.__results
 
-    def get_one(self, key) -> Report:
-        return self.__results.get(key)
+    def pop_and_get_one(self, key) -> Report:
+        try:
+            return self.__results.pop(key)
+        except KeyError:
+            return None
 
 
 class RequestParser:
@@ -138,8 +142,10 @@ class RequestParser:
     Internal use Only.
     """
 
+    __tmpdirs: Dict[str, str] = {}
+
     @staticmethod
-    def __parse_multipart_req(args: list, files):
+    def __parse_multipart_req(args: List[str], files) -> (List[str], str):
         # Check if file part exists
         fnames = []
         for arg in args:
@@ -154,7 +160,7 @@ class RequestParser:
             )
 
         # create a new temporary directory
-        tmpdir = tempfile.mkdtemp()
+        tmpdir: str = tempfile.mkdtemp()
         for fname in fnames:
             if fname not in files:
                 raise Exception(
@@ -173,14 +179,16 @@ class RequestParser:
         logger.debug(f"Request files saved under temp directory: '{tmpdir}'")
         return args, tmpdir
 
-    def parse_req(self, request) -> (str, str):
+    def parse_req(self, request, base_command: str) -> (str, str):
+        args: List[str] = []
+        tmpdir = None
         if request.is_json:
             # request does not contain a file
             args = request.json.get("args", [])
         elif request.files:
             # request contains file
             received_args = request.form.getlist("args")
-            args, self.tmpdir = RequestParser.__parse_multipart_req(
+            args, tmpdir = RequestParser.__parse_multipart_req(
                 received_args, request.files
             )
         else:
@@ -188,18 +196,28 @@ class RequestParser:
             # i.e. just run-script
             args = []
 
-        cmd: list = self.command_name.split(" ")
+        cmd: List[str] = base_command.split(" ")
         cmd.extend(args)
-        return cmd, calc_hash(cmd)
+        key: str = calc_hash(cmd)
+        if tmpdir:
+            self.__tmpdirs.update({key: tmpdir})
 
-    def cleanup_temp_dir(self, _) -> None:
-        if hasattr(self, "tmpdir"):
-            try:
-                __import__("shutil").rmtree(self.tmpdir)
-                logger.debug(f"temp directory: '{self.tmpdir}' was deleted.")
-                del self.tmpdir
-            except Exception:
-                logger.debug(f"Failed to clear temp directory: '{self.tmpdir}'.")
+        return cmd, key
 
-    def __init__(self, command_name) -> None:
-        self.command_name = command_name
+    def cleanup_temp_dir(self, future) -> None:
+        key: str = future.result().key
+        tmpdir: str = self.__tmpdirs.get(key, None)
+        if not tmpdir:
+            return None
+
+        try:
+            shutil.rmtree(tmpdir)
+            logger.debug(
+                f"Job: '{key}' --> Temporary directory: '{tmpdir}' "
+                "successfully deleted."
+            )
+            self.__tmpdirs.pop(key)
+        except Exception:
+            logger.debug(
+                f"Job: '{key}' --> Failed to clear Temporary directory: '{tmpdir}'."
+            )

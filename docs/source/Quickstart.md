@@ -56,15 +56,16 @@ returns JSON,
 
 ```json
 {
-   "key": "ddbe0a94847c65f9b8198424ffd07c50",
+   "key": "ddbe0a94847c",
+   "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94847c",
    "status": "running"
 }
 ```
 
-Then using this `key` you can query for the result,
+Then using this `key` you can query for the result or just by going to the `result_url`,
 
 ```bash
-$ curl http://localhost:4000/commands/saythis?key=ddbe0a94847c65f9b8198424ffd07c50
+$ curl http://localhost:4000/commands/saythis?key=ddbe0a94847c
 ```
 
 Returns result in JSON,
@@ -73,7 +74,7 @@ Returns result in JSON,
 {
   "end_time": 1593019807.782958, 
   "error": "", 
-  "md5": "ddbe0a94847c65f9b8198424ffd07c50", 
+  "md5": "ddbe0a94847c", 
   "process_time": 0.00748753547668457, 
   "report": {
     "result": "Hello World!\n"
