@@ -1,5 +1,4 @@
 # system imports
-import requests
 import logging
 import sys
 
@@ -24,31 +23,28 @@ logger.setLevel(logging.INFO)
 executor = Executor(app)
 shell2http = Shell2HTTP(app, executor, base_url_prefix="/cmd/")
 
-ENDPOINT = "echo"
+ENDPOINT_AND_CMD = "echo"
 
-shell2http.register_command(endpoint=ENDPOINT, command_name="echo")
+shell2http.register_command(endpoint=ENDPOINT_AND_CMD, command_name=ENDPOINT_AND_CMD)
 
 
-@app.route("/")
-def test():
+# Test Runner
+if __name__ == "__main__":
+    app.testing = True
+    c = app.test_client()
     """
     The final executed command becomes:
     ```bash
     $ echo hello world
     ```
     """
-    url = f"http://localhost:4000/cmd/{ENDPOINT}"
-    data = {"args": ["hello", "world"]}
-    resp = requests.post(url, json=data)
-    resp_data = resp.json()
-    print(resp_data)
-    key = resp_data["key"]
-    if key:
-        report = requests.get(f"{url}?key={key}")
-        return report.json()
-    return resp_data
-
-
-# Application Runner
-if __name__ == "__main__":
-    app.run(port=4000)
+    # make new request for a command with arguments
+    uri = f"/cmd/{ENDPOINT_AND_CMD}"
+    # timeout in seconds, default value is 3600
+    data = {"args": ["hello", "world"], "timeout": 60}
+    resp1 = c.post(uri, json=data).get_json()
+    print(resp1)
+    # fetch result
+    result_url = resp1["result_url"]
+    resp2 = c.get(result_url).get_json()
+    print(resp2)

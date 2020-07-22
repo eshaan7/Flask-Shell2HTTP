@@ -8,18 +8,20 @@
 
 # system imports
 from http import HTTPStatus
+from typing import Callable, Any
 
 # web imports
 from flask import request, jsonify, make_response
 from flask.views import MethodView
+from flask_executor import Executor
+from flask_executor.futures import Future
 
 # lib imports
-from .classes import JobExecutor, ReportStore, RequestParser
+from .classes import RequestParser, Report, run_command
 from .helpers import get_logger
 
 
 logger = get_logger()
-store = ReportStore()
 request_parser = RequestParser()
 
 
@@ -39,20 +41,24 @@ class shell2httpAPI(MethodView):
             )
             if not key:
                 raise Exception("No key provided in arguments.")
-            # check if job has been finished
-            future = self.executor.get_job(key)
-            if future:
-                if not future.done:
-                    logger.debug(f"Job: '{key}' --> still running.")
-                    return make_response(jsonify(status="running", key=key), 200)
 
-                # pop future object since it has been finished
-                self.executor.pop_job(key)
+            # get the future object
+            future: Future = self.executor.futures._futures.get(key)
+            if not future:
+                raise Exception(f"No report exists for key: '{key}'.")
+
+            # check if job has been finished
+            if not future.done():
+                logger.debug(f"Job: '{key}' --> still running.")
+                return make_response(jsonify(status="running", key=key), 200)
+
+            # pop future object since it has been finished
+            self.executor.futures.pop(key)
 
             # if yes, get result from store
-            report = store.pop_and_get_one(key)
+            report: Report = future.result()
             if not report:
-                raise Exception(f"No report exists for key: '{key}'.")
+                raise Exception(f"Job: '{key}' --> No report exists.")
 
             resp = report.to_dict()
             logger.debug(f"Job: '{key}' --> Requested report: {resp}")
@@ -68,20 +74,18 @@ class shell2httpAPI(MethodView):
                 f"Received request for endpoint: '{request.url_rule}'. "
                 f"Requester: '{request.remote_addr}'."
             )
-            # Check if command is correct and parse it
-            cmd, key = request_parser.parse_req(request, self.command_name)
+            # Check if request data is correct and parse it
+            cmd, timeout, key = request_parser.parse_req(request, self.command_name)
 
             # run executor job in background
-            future = self.executor.new_job(
-                future_key=JobExecutor.make_key(key),
-                fn=self.executor.run_command,
-                cmd=cmd,
-                key=key,
+            future = self.executor.submit_stored(
+                future_key=key, fn=run_command, cmd=cmd, timeout=timeout, key=key,
             )
-            # callback that adds result to store
-            future.add_done_callback(store.save_result)
             # callback that removes the temporary directory
             future.add_done_callback(request_parser.cleanup_temp_dir)
+            if self.user_callback_fn:
+                # user defined callback fn
+                future.add_done_callback(self.user_callback_fn)
 
             logger.info(f"Job: '{key}' --> added to queue for command: {cmd}")
             result_url = f"{request.base_url}?key={key}"
@@ -94,6 +98,12 @@ class shell2httpAPI(MethodView):
             logger.error(e)
             return make_response(jsonify(error=str(e)), HTTPStatus.BAD_REQUEST)
 
-    def __init__(self, command_name, job_executor):
+    def __init__(
+        self,
+        command_name: str,
+        user_callback_fn: Callable[[Future], Any],
+        executor: Executor,
+    ):
         self.command_name: str = command_name
-        self.executor: JobExecutor = job_executor
+        self.user_callback_fn = user_callback_fn
+        self.executor: Executor = executor

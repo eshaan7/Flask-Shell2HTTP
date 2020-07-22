@@ -1,6 +1,8 @@
 import logging
 from typing import List
 
+DEFAULT_TIMEOUT = 3600
+
 
 def list_replace(lst: List, old, new) -> None:
     """
@@ -23,7 +25,7 @@ def calc_hash(lst: List) -> str:
     that's why a faster and insecure hashing algorithm is chosen.
     """
     to_hash = " ".join(lst).encode("ascii")
-    return __import__("hashlib").sha1(to_hash).hexdigest()[:12]
+    return __import__("hashlib").sha1(to_hash).hexdigest()[:8]
 
 
 def get_logger() -> logging.Logger:

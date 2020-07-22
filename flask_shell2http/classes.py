@@ -3,137 +3,97 @@ import time
 import subprocess
 import tempfile
 import shutil
-from collections import OrderedDict
-from typing import List, Dict
+import dataclasses
+from typing import List, Dict, Any
 
 # web imports
-from flask import safe_join
+from flask.helpers import safe_join
 from werkzeug.utils import secure_filename
 from http import HTTPStatus
-from flask_executor import Executor
+from flask_executor.futures import Future
 
 # lib imports
-from .helpers import list_replace, calc_hash, get_logger
+from .helpers import list_replace, calc_hash, get_logger, DEFAULT_TIMEOUT
 
 logger = get_logger()
 
 
+@dataclasses.dataclass
 class Report:
     """
-    Report class to store the command's result.
+    Report dataclass to store the command's result.
     Internal use only.
     """
 
-    def __init__(self, key, report, error, start_time, status="failed"):
-        self.start_time = start_time
-        self.end_time = time.time()
+    key: str
+    report: Any
+    error: Any
+    status: str
+    start_time: float
+    end_time: float
+    returncode: int
+    process_time: float = dataclasses.field(init=False)
+
+    def __post_init__(self):
         self.process_time = self.end_time - self.start_time
-        self.key = key
-        self.report = report
-        self.error = error
-        self.status = status
 
     def to_dict(self):
-        resp = self.__dict__
-        return resp
+        return dataclasses.asdict(self)
 
 
-class JobExecutor:
+def run_command(cmd: List[str], timeout: int, key: str) -> Report:
     """
-    A high-level API for flask_executor.Executor() to allow common operations.
-    Internal use only.
+    This function is called by the executor to run given command
+    using a subprocess asynchronously.
+
+    :param cmd: List[str]
+        command to run split as a list
+    :param key: str
+        future_key of particular Future instance
+    :param timeout: int
+        maximum timeout in seconds (default = 3600)
+
+    :rtype Report
+
+    :returns:
+        A Concurrent.Future object where future.result() is the report
     """
+    start_time: float = time.time()
+    status: str = "failed"
+    try:
+        p = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text="ascii",
+            timeout=timeout,
+        )
+        stdout, stderr, returncode = p.stdout, p.stderr, p.returncode
+        if returncode == 0:
+            status = "success"
+        elif stderr and stdout:
+            status = "reported_with_fails"
+        elif stdout and not stderr:
+            status = "success"
 
-    executor: Executor
+        logger.info(f"Job: '{key}' --> finished with status: '{status}'.")
 
-    @staticmethod
-    def make_key(k) -> str:
-        return f"job_{k}"
+    except Exception as e:
+        status = "failed"
+        returncode = -1
+        stdout = None
+        stderr = str(e)
+        logger.error(f"Job: '{key}' --> failed. Reason: \"{stderr}\".")
 
-    def get_job(self, k):
-        key = self.make_key(k)
-        return self.executor.futures._futures.get(key, None)
-
-    def cancel_job(self, k):
-        key = self.make_key(k)
-        return self.executor.futures._futures.get(key).cancel()
-
-    def new_job(self, **kwargs):
-        return self.executor.submit_stored(**kwargs)
-
-    def pop_job(self, k):
-        key = self.make_key(k)
-        return self.executor.futures.pop(key)
-
-    def __init__(self, executor) -> None:
-        self.executor = executor
-
-    def run_command(self, cmd, key) -> Report:
-        """
-        This function is called by the executor to run given command
-        using a subprocess asynchronously.
-
-        :returns:
-            A ConcurrentFuture object where future.result = Report()
-        """
-        start_time = time.time()
-        try:
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            stdout = stdout.decode("ascii")
-            stderr = stderr.decode("ascii")
-            if stderr and stdout:
-                status = "reported_with_fails"
-            elif stdout and not stderr:
-                status = "success"
-            else:
-                status = "failed"
-
-            logger.info(f"Job: '{key}' --> finished with status: '{status}'.")
-            return Report(
-                key=key,
-                report=stdout,
-                error=stderr,
-                start_time=start_time,
-                status=status,
-            )
-
-        except Exception as e:
-            str_err = str(e)
-            self.cancel_job(key)
-            logger.error(f"Job: '{key}' --> failed. Reason: {str_err}.")
-            return Report(
-                key=key,
-                report=None,
-                error=str_err,
-                start_time=start_time,
-                status="failed",
-            )
-
-
-class ReportStore:
-    """
-    Acts as a data-store for command's results.
-    """
-
-    __results: "OrderedDict[str, Report]" = OrderedDict()
-
-    def save_result(self, future) -> None:
-        """
-        callback fn for Future object.
-        """
-        # get job result from future
-        job_res = future.result()
-        self.__results.update({job_res.key: job_res})
-
-    def get_all(self):
-        return self.__results
-
-    def pop_and_get_one(self, key) -> Report:
-        try:
-            return self.__results.pop(key)
-        except KeyError:
-            return None
+    return Report(
+        key=key,
+        report=stdout,
+        error=stderr,
+        status=status,
+        start_time=start_time,
+        end_time=time.time(),
+        returncode=returncode,
+    )
 
 
 class RequestParser:
@@ -185,9 +145,11 @@ class RequestParser:
         if request.is_json:
             # request does not contain a file
             args = request.json.get("args", [])
+            timeout: int = request.json.get("timeout", DEFAULT_TIMEOUT)
         elif request.files:
             # request contains file
             received_args = request.form.getlist("args")
+            timeout: int = request.form.get("timeout", DEFAULT_TIMEOUT)
             args, tmpdir = RequestParser.__parse_multipart_req(
                 received_args, request.files
             )
@@ -195,6 +157,7 @@ class RequestParser:
             # request is w/o any data
             # i.e. just run-script
             args = []
+            timeout: int = DEFAULT_TIMEOUT
 
         cmd: List[str] = base_command.split(" ")
         cmd.extend(args)
@@ -202,9 +165,9 @@ class RequestParser:
         if tmpdir:
             self.__tmpdirs.update({key: tmpdir})
 
-        return cmd, key
+        return cmd, timeout, key
 
-    def cleanup_temp_dir(self, future) -> None:
+    def cleanup_temp_dir(self, future: Future) -> None:
         key: str = future.result().key
         tmpdir: str = self.__tmpdirs.get(key, None)
         if not tmpdir:

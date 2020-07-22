@@ -1,10 +1,15 @@
 # system imports
 from collections import OrderedDict
+from typing import Callable, Any
+
+# web imports
+from flask_executor import Executor
+from flask_executor.futures import Future
 
 # lib imports
-from .classes import JobExecutor
 from .api import shell2httpAPI
 from .helpers import get_logger
+
 
 logger = get_logger()
 
@@ -29,12 +34,14 @@ class Shell2HTTP(object):
     __commands: "OrderedDict[str, str]" = OrderedDict()
     __url_prefix: str = "/"
 
-    def __init__(self, app=None, executor=None, base_url_prefix="/") -> None:
+    def __init__(
+        self, app=None, executor: Executor = None, base_url_prefix: str = "/"
+    ) -> None:
         self.__url_prefix = base_url_prefix
         if app and executor:
             self.init_app(app, executor)
 
-    def init_app(self, app, executor) -> None:
+    def init_app(self, app, executor: Executor) -> None:
         """
         For use with Flask's `Application Factory`_ method.
 
@@ -50,12 +57,12 @@ class Shell2HTTP(object):
            https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/
         """
         self.app = app
-        self.__executor = JobExecutor(executor)
+        self.__executor: Executor = executor
         self.__init_extension()
 
     def __init_extension(self) -> None:
         """
-        Adds the Shell2HTTP() instance to `app.extensions` list
+        Adds the Shell2HTTP() instance to `app.extensions` list.
         For internal use only.
         """
         if not hasattr(self.app, "extensions"):
@@ -63,7 +70,12 @@ class Shell2HTTP(object):
 
         self.app.extensions["shell2http"] = self
 
-    def register_command(self, endpoint: str, command_name: str) -> None:
+    def register_command(
+        self,
+        endpoint: str,
+        command_name: str,
+        callback_fn: Callable[[Future], Any] = None,
+    ) -> None:
         """
         Function to map a shell command to an endpoint.
 
@@ -76,13 +88,24 @@ class Shell2HTTP(object):
                   to this endpoint will be appended to ``echo``.\n
                   For example,
                   if you pass ``{ "args": ["Hello", "World"] }``
-                  in POST request, it gets converted to ``echo Hello World``.
+                  in POST request, it gets converted to ``echo Hello World``.\n
+            callback_fn (func):
+                - An optional function that is invoked when a requested process
+                    to this endpoint completes execution.
+                - This is added as a
+                    ``concurrent.Future.add_done_callback(fn=callback_fn)``
+                - A same callback function may be used for multiple commands.
 
         Examples::
 
+            def my_callback_fn(future):
+                print(future.result())
+
             shell2http.register_command(endpoint="echo", command_name="echo")
             shell2http.register_command(
-                endpoint="myawesomescript", command_name="./fuxsocy.py"
+                endpoint="myawesomescript",
+                command_name="./fuxsocy.py",
+                callback_fn=my_callback_fn
             )
         """
         uri = self.__construct_route(endpoint)
@@ -99,11 +122,14 @@ class Shell2HTTP(object):
         self.app.add_url_rule(
             uri,
             view_func=shell2httpAPI.as_view(
-                command_name, command_name=command_name, job_executor=self.__executor,
+                endpoint,
+                command_name=command_name,
+                user_callback_fn=callback_fn,
+                executor=self.__executor,
             ),
         )
         self.__commands.update({uri: command_name})
-        logger.info(f"New URI: '{uri}' registered for command: '{command_name}'.")
+        logger.info(f"New endpoint: '{uri}' registered for command: '{command_name}'.")
 
     def get_registered_commands(self) -> "OrderedDict[str, str]":
         """
@@ -111,7 +137,8 @@ class Shell2HTTP(object):
         Flask provides a ``Flask.url_map`` attribute.
 
         Returns:
-            OrderedDict[uri, command] i.e. mapping of registered commands and their URLs.
+            OrderedDict[uri, command]
+            i.e. mapping of registered commands and their URLs.
         """
         return self.__commands
 

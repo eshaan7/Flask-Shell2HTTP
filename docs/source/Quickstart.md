@@ -27,7 +27,7 @@ app = Flask(__name__)
 executor = Executor(app)
 shell2http = Shell2HTTP(app=app, executor=executor, base_url_prefix="/commands/")
 
-shell2http.register_command(endpoint="saythis", command_name="echo")
+shell2http.register_command(endpoint="saythis", command_name="echo", callback_fn=None)
 ```
 
 Run the application server with, `$ flask run -p 4000`.
@@ -45,7 +45,8 @@ $ curl -X POST -H 'Content-Type: application/json' -d '{"args": ["Hello", "World
 <details><summary>or using python's requests module,</summary>
 
 ```python
-data = {"args": ["Hello", "World!"]}
+# You can also add a timeout if you want, default value is 3600 seconds
+data = {"args": ["Hello", "World!"], "timeout": 60}
 resp = requests.post("http://localhost:4000/commands/saythis", json=data)
 print("Result:", resp.json())
 ```
@@ -57,7 +58,7 @@ returns JSON,
 ```json
 {
    "key": "ddbe0a94847c",
-   "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94847c",
+   "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94",
    "status": "running"
 }
 ```
@@ -65,21 +66,25 @@ returns JSON,
 Then using this `key` you can query for the result or just by going to the `result_url`,
 
 ```bash
-$ curl http://localhost:4000/commands/saythis?key=ddbe0a94847c
+$ curl http://localhost:4000/commands/saythis?key=ddbe0a94
 ```
 
 Returns result in JSON,
 
 ```json
 {
-  "end_time": 1593019807.782958, 
-  "error": "", 
-  "md5": "ddbe0a94847c", 
-  "process_time": 0.00748753547668457, 
-  "report": {
-    "result": "Hello World!\n"
-  }, 
-  "start_time": 1593019807.7754705, 
-  "status": "success"
+  "report": "Hello World!\n",
+  "key": "ddbe0a94",
+  "start_time": 1593019807.7754705,
+  "end_time": 1593019807.782958,
+  "process_time": 0.00748753547668457,
+  "status": "success",
+  "returncode": 0,
+  "error": "",
 }
 ```
+
+##### Bonus
+
+You can also define callback functions or use signals for reactive programming. There may be cases where the process doesn't print result to standard output but to a file/database. In such cases, you may want to intercept the future object and update it's result attribute.
+I request you to take a look at [Examples.md](Examples.md) for such use-cases.
