@@ -20,7 +20,8 @@ Inspired by the work of awesome folks over at [msoap/shell2http](https://github.
 - Map a base command to an endpoint and pass dynamic arguments to it. See [Example code](examples/basic.py).
 - Can also process multiple uploaded files in one command. See [Example code](examples/multiple_files.py).
 - This is useful for internal docker-to-docker communications if you have different binaries distributed in micro-containers. See [real-life example](https://github.com/intelowlproject/IntelOwl/blob/develop/integrations/peframe/app.py).
-- Currently, all commands are run asynchronously (default timeout is 3600 seconds), so result is not available directly. An option _may_ be provided for this in future release.
+- You can define a callback function/ use signals to listen for process completion. See [Example code](examples/with_callback.py). Meybe want to intercept on completion and update the result ? See [Example code](examples/custom_save_fn.py)
+- Currently, all commands run asynchronously (default timeout is 3600 seconds), so result is not available directly. An option _may_ be provided for this in future release.
 
 > Note: This extension is primarily meant for executing long-running
 > shell commands/scripts (like nmap, code-analysis' tools) in background from an HTTP request and getting the result at a later time.
@@ -32,7 +33,9 @@ Inspired by the work of awesome folks over at [msoap/shell2http](https://github.
 Read the [Quickstart](https://flask-shell2http.readthedocs.io/en/stable/Quickstart.html) 
 from the [documentation](https://flask-shell2http.readthedocs.io/) to get started!
 
+I highly recommend the [Examples](https://flask-shell2http.readthedocs.io/en/stable/Examples.html) section.
+
 ## Why?
 
-This was initially made to integrate various command-line tools easily with [IntelOwl](https://github.com/intelowlproject/IntelOwl).
+This was initially made to integrate various command-line tools easily with [Intel Owl](https://github.com/intelowlproject/IntelOwl), which I am working on as part of Google Summer of Code.
 
