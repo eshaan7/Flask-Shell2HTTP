@@ -10,7 +10,7 @@ A minimalist [Flask](https://github.com/pallets/flask) extension that serves as 
 
 - **Convert any command-line tool into a REST API service.**
 - Execute pre-defined shell commands asynchronously and securely via flask's endpoints.
-- Designed for development, prototyping or remote control.
+- Designed for binary to binary/HTTP communication, development, prototyping, remote control and [more](https://flask-shell2http.readthedocs.io/en/stable/Examples.html).
 
 Inspired by the work of awesome folks over at [msoap/shell2http](https://github.com/msoap/shell2http).
 
