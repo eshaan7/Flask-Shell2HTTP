@@ -25,6 +25,7 @@ def test():
     ```
     """
     url = "http://localhost:4000/scripts/hacktheplanet"
+    # request without any data
     resp = requests.post(url)
     resp_data = resp.json()
     print(resp_data)

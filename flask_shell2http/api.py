@@ -8,7 +8,8 @@
 
 # system imports
 from http import HTTPStatus
-from typing import Callable, Any
+import functools
+from typing import Callable, Dict, Any
 
 # web imports
 from flask import request, jsonify, make_response
@@ -75,7 +76,9 @@ class shell2httpAPI(MethodView):
                 f"Requester: '{request.remote_addr}'."
             )
             # Check if request data is correct and parse it
-            cmd, timeout, key = request_parser.parse_req(request, self.command_name)
+            cmd, timeout, callback_context, key = request_parser.parse_req(
+                request, self.command_name
+            )
 
             # run executor job in background
             future = self.executor.submit_stored(
@@ -84,8 +87,10 @@ class shell2httpAPI(MethodView):
             # callback that removes the temporary directory
             future.add_done_callback(request_parser.cleanup_temp_dir)
             if self.user_callback_fn:
-                # user defined callback fn
-                future.add_done_callback(self.user_callback_fn)
+                # user defined callback fn with callback_context if any
+                future.add_done_callback(
+                    functools.partial(self.user_callback_fn, callback_context)
+                )
 
             logger.info(f"Job: '{key}' --> added to queue for command: {cmd}")
             result_url = f"{request.base_url}?key={key}"
@@ -101,7 +106,7 @@ class shell2httpAPI(MethodView):
     def __init__(
         self,
         command_name: str,
-        user_callback_fn: Callable[[Future], Any],
+        user_callback_fn: Callable[[Dict, Future], Any],
         executor: Executor,
     ):
         self.command_name: str = command_name

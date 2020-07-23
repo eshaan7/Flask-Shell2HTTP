@@ -14,13 +14,14 @@ shell2http = Shell2HTTP(app, executor, base_url_prefix="/cmd/")
 ENDPOINT = "echo"
 
 
-def my_callback_fn(future: Future):
+def my_callback_fn(extra_callback_context, future: Future):
     """
     Will be invoked on every process completion
     """
     print("[i] Process running ?:", future.running())
     print("[i] Process completed ?:", future.done())
     print("[+] Result: ", future.result())
+    print("[+] Context: ", extra_callback_context)
 
 
 shell2http.register_command(
