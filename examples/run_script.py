@@ -16,6 +16,7 @@ shell2http = Shell2HTTP(app, executor, base_url_prefix="/scripts/")
 shell2http.register_command(endpoint="hacktheplanet", command_name="./fuxsocy.py")
 
 
+# Example route. Go to "/" to execute.
 @app.route("/")
 def test():
     """

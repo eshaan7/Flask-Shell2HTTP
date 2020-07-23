@@ -21,6 +21,7 @@ def my_callback_fn(extra_callback_context, future: Future):
     print("[i] Process running ?:", future.running())
     print("[i] Process completed ?:", future.done())
     print("[+] Result: ", future.result())
+    # future.result() returns a dictionary
     print("[+] Context: ", extra_callback_context)
 
 

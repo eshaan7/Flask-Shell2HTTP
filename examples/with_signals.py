@@ -18,7 +18,7 @@ CMD = "echo"
 # Signal Handling
 signal_handler = Namespace()
 my_signal = signal_handler.signal(f"on_{CMD}_complete")
-# ..or any other name of your choice,
+# ..or any other name of your choice
 
 
 @my_signal.connect

@@ -18,7 +18,7 @@ from flask_executor import Executor
 from flask_executor.futures import Future
 
 # lib imports
-from .classes import RequestParser, Report, run_command
+from .classes import RequestParser, run_command
 from .helpers import get_logger
 
 
@@ -57,13 +57,12 @@ class shell2httpAPI(MethodView):
             self.executor.futures.pop(key)
 
             # if yes, get result from store
-            report: Report = future.result()
+            report: Dict = future.result()
             if not report:
                 raise Exception(f"Job: '{key}' --> No report exists.")
 
-            resp = report.to_dict()
-            logger.debug(f"Job: '{key}' --> Requested report: {resp}")
-            return make_response(jsonify(resp), HTTPStatus.OK)
+            logger.debug(f"Job: '{key}' --> Requested report: {report}")
+            return jsonify(report)
 
         except Exception as e:
             logger.error(e)

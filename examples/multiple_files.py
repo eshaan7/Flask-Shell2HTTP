@@ -1,6 +1,7 @@
 # system imports
 import requests
 import tempfile
+import json
 
 # web imports
 from flask import Flask
@@ -32,13 +33,16 @@ def test():
     ```
     """
     url = f"http://localhost:4000/cmd/{ENDPOINT}"
-    data = {"args": ["@inputfile", "@someotherfile"]}
+    # create and read dummy data from temporary files
     with tempfile.TemporaryFile() as fp:
         fp.write(b"Hello world!")
         fp.seek(0)
         f = fp.read()
-        files = {"inputfile": f, "someotherfile": f}
-    resp = requests.post(url=url, files=files, data=data)
+    # they key should be `request_json` only.
+    form_data = {"args": ["@inputfile", "@someotherfile"]}
+    req_data = {"request_json": json.dumps(form_data)}
+    req_files = {"inputfile": f, "someotherfile": f}
+    resp = requests.post(url=url, files=req_files, data=req_data)
     resp_data = resp.json()
     print(resp_data)
     key = resp_data["key"]

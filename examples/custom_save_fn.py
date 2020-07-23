@@ -24,12 +24,12 @@ def intercept_result(context, future: Future):
         with open(fname) as f:
             data = f.read()
         # 1. get current result object
-        res = future.result()
+        res = future.result()  # this returns a dictionary
         # 2. update the report variable,
         # you may update only these: report,error,status
-        res.report = data
+        res["report"] = data
         if context.get("force_success", False):
-            res.status = "success"
+            res["status"] = "success"
         # 3. set new result
         future._result = res
 

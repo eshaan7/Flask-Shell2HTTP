@@ -1,15 +1,14 @@
 # system imports
 import time
+import json
 import subprocess
 import tempfile
 import shutil
-import dataclasses
-from typing import List, Dict, Any
+from typing import List, Dict
 
 # web imports
 from flask.helpers import safe_join
 from werkzeug.utils import secure_filename
-from http import HTTPStatus
 from flask_executor.futures import Future
 
 # lib imports
@@ -18,30 +17,7 @@ from .helpers import list_replace, calc_hash, get_logger, DEFAULT_TIMEOUT
 logger = get_logger()
 
 
-@dataclasses.dataclass
-class Report:
-    """
-    Report dataclass to store the command's result.
-    Internal use only.
-    """
-
-    key: str
-    report: Any
-    error: Any
-    status: str
-    start_time: float
-    end_time: float
-    returncode: int
-    process_time: float = dataclasses.field(init=False)
-
-    def __post_init__(self):
-        self.process_time = self.end_time - self.start_time
-
-    def to_dict(self):
-        return dataclasses.asdict(self)
-
-
-def run_command(cmd: List[str], timeout: int, key: str) -> Report:
+def run_command(cmd: List[str], timeout: int, key: str) -> Dict:
     """
     This function is called by the executor to run given command
     using a subprocess asynchronously.
@@ -53,7 +29,7 @@ def run_command(cmd: List[str], timeout: int, key: str) -> Report:
     :param timeout: int
         maximum timeout in seconds (default = 3600)
 
-    :rtype Report
+    :rtype: Dict
 
     :returns:
         A Concurrent.Future object where future.result() is the report
@@ -85,14 +61,17 @@ def run_command(cmd: List[str], timeout: int, key: str) -> Report:
         stderr = str(e)
         logger.error(f"Job: '{key}' --> failed. Reason: \"{stderr}\".")
 
-    return Report(
+    end_time: float = time.time()
+    process_time = end_time - start_time
+    return dict(
         key=key,
         report=stdout,
         error=stderr,
         status=status,
-        start_time=start_time,
-        end_time=time.time(),
         returncode=returncode,
+        start_time=start_time,
+        end_time=end_time,
+        process_time=process_time,
     )
 
 
@@ -115,18 +94,14 @@ class RequestParser:
         if not fnames:
             raise Exception(
                 "No filename(s) specified."
-                "Please prefix file argument(s) with @ character.",
-                HTTPStatus.BAD_REQUEST,
+                "Please prefix file argument(s) with @ character."
             )
 
         # create a new temporary directory
         tmpdir: str = tempfile.mkdtemp()
         for fname in fnames:
             if fname not in files:
-                raise Exception(
-                    f"No File part with filename: {fname} in request.",
-                    HTTPStatus.BAD_REQUEST,
-                )
+                raise Exception(f"No File part with filename: {fname} in request.")
             req_file = files.get(fname)
             filename = secure_filename(req_file.filename)
             # calc file location
@@ -152,10 +127,11 @@ class RequestParser:
             timeout: int = request.json.get("timeout", DEFAULT_TIMEOUT)
             callback_context = request.json.get("callback_context", {})
         elif request.files:
-            # request contains file
-            callback_context = request.form.get("callback_context", {})
-            received_args = request.form.getlist("args")
-            timeout: int = request.form.get("timeout", DEFAULT_TIMEOUT)
+            # request contains file and form_data
+            data = json.loads(request.form.get("request_json", "{}"))
+            received_args = data.get("args", [])
+            timeout: int = data.get("timeout", DEFAULT_TIMEOUT)
+            callback_context = data.get("callback_context", {})
             args, tmpdir = RequestParser.__parse_multipart_req(
                 received_args, request.files
             )
@@ -169,7 +145,9 @@ class RequestParser:
         return cmd, timeout, callback_context, key
 
     def cleanup_temp_dir(self, future: Future) -> None:
-        key: str = future.result().key
+        key: str = future.result().get("key", None)
+        if not key:
+            return None
         tmpdir: str = self.__tmpdirs.get(key, None)
         if not tmpdir:
             return None
