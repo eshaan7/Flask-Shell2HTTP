@@ -27,7 +27,11 @@ app = Flask(__name__)
 executor = Executor(app)
 shell2http = Shell2HTTP(app=app, executor=executor, base_url_prefix="/commands/")
 
-shell2http.register_command(endpoint="saythis", command_name="echo", callback_fn=None)
+def my_callback_fn(context, future):
+  # additional user-defined callback function
+  print(context, future.result())
+
+shell2http.register_command(endpoint="saythis", command_name="echo", callback_fn=my_callback_fn)
 ```
 
 Run the application server with, `$ flask run -p 4000`.
@@ -53,11 +57,13 @@ print("Result:", resp.json())
 
 </details>
 
+> Note: You can see the JSON schema for the POST request [here](https://github.com/Eshaan7/Flask-Shell2HTTP/blob/master/post-request-schema.json).
+
 returns JSON,
 
 ```json
 {
-   "key": "ddbe0a94847c",
+   "key": "ddbe0a94",
    "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94",
    "status": "running"
 }
