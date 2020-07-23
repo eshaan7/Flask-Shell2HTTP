@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "The POST request schema",
+  "default": {},
+  "examples": [
+    {
+      "args": ["hello", "world"],
+      "timeout": 60,
+      "callback_context": {
+        "read_result_from": "/path/to/saved/file",
+        "force_success": true
+      }
+    }
+  ],
+  "required": [],
+  "properties": {
+    "args": {
+      "type": "array",
+      "title": "Arguments that will be appended to the base command",
+      "default": [],
+      "examples": [
+        ["hello", "world"],
+        ["@inputfile", "@someotherfile"]
+      ]
+    },
+    "timeout": {
+      "type": "integer",
+      "title": "subprocess timeout in seconds",
+      "description": "Maximum timeout after which subprocess fails if not already complete.",
+      "default": 3600
+    },
+    "callback_context": {
+      "type": "object",
+      "title": "Additional context for user defined callback function",
+      "description": "This object will be passed as the first argument of user-defined callback function",
+      "default": {},
+      "examples": [
+        {
+          "read_result_from": "/path/to/saved/file",
+          "force_success": true
+        }
+      ]
+    }
+  }
+}

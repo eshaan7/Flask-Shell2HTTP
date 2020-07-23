@@ -6,13 +6,12 @@
 </a>
 [![flask-shell2http on pypi](https://img.shields.io/pypi/v/flask-shell2http)](https://pypi.org/project/Flask-Shell2HTTP/)
 
-A minimalist [Flask](https://github.com/pallets/flask) extension that serves as a REST API wrapper for python's subprocess API.
+A minimalist [Flask](https://github.com/pallets/flask) extension that serves as a RESTful/HTTP wrapper for python's subprocess API.
 
 - **Convert any command-line tool into a REST API service.**
-- Execute pre-defined shell commands asynchronously and securely via flask's endpoints.
+- Execute pre-defined shell commands asynchronously and securely via flask's endpoints with dynamic arguments, file upload, callback function capabilities.
 - Designed for binary to binary/HTTP communication, development, prototyping, remote control and [more](https://flask-shell2http.readthedocs.io/en/stable/Examples.html).
 
-Inspired by the work of awesome folks over at [msoap/shell2http](https://github.com/msoap/shell2http).
 
 ## Use Cases
 
@@ -20,8 +19,10 @@ Inspired by the work of awesome folks over at [msoap/shell2http](https://github.
 - Map a base command to an endpoint and pass dynamic arguments to it. See [Example code](examples/basic.py).
 - Can also process multiple uploaded files in one command. See [Example code](examples/multiple_files.py).
 - This is useful for internal docker-to-docker communications if you have different binaries distributed in micro-containers. See [real-life example](https://github.com/intelowlproject/IntelOwl/blob/develop/integrations/peframe/app.py).
-- You can define a callback function/ use signals to listen for process completion. See [Example code](examples/with_callback.py). Meybe want to intercept on completion and update the result ? See [Example code](examples/custom_save_fn.py)
-- Currently, all commands run asynchronously (default timeout is 3600 seconds), so result is not available directly. An option _may_ be provided for this in future release.
+- You can define a callback function/ use signals to listen for process completion. See [Example code](examples/with_callback.py). 
+ - Maybe want to pass some additional context to the callback function ? 
+ - Maybe intercept on completion and update the result ? See [Example code](examples/custom_save_fn.py)
+- Currently, all commands run asynchronously (default timeout is 3600 seconds), so result is not available directly. An option _may_ be provided for this in future releases for commands that return immediately.
 
 > Note: This extension is primarily meant for executing long-running
 > shell commands/scripts (like nmap, code-analysis' tools) in background from an HTTP request and getting the result at a later time.
@@ -35,7 +36,8 @@ from the [documentation](https://flask-shell2http.readthedocs.io/) to get starte
 
 I highly recommend the [Examples](https://flask-shell2http.readthedocs.io/en/stable/Examples.html) section.
 
-## Why?
+## Inspiration
 
 This was initially made to integrate various command-line tools easily with [Intel Owl](https://github.com/intelowlproject/IntelOwl), which I am working on as part of Google Summer of Code.
 
+The name was inspired by the awesome folks over at [msoap/shell2http](https://github.com/msoap/shell2http).
