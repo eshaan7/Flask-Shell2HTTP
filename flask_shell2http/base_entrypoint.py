@@ -1,6 +1,6 @@
 # system imports
 from collections import OrderedDict
-from typing import Callable, Any
+from typing import Callable, Dict, Any
 
 # web imports
 from flask_executor import Executor
@@ -74,7 +74,7 @@ class Shell2HTTP(object):
         self,
         endpoint: str,
         command_name: str,
-        callback_fn: Callable[[Future], Any] = None,
+        callback_fn: Callable[[Dict, Future], Any] = None,
     ) -> None:
         """
         Function to map a shell command to an endpoint.
@@ -89,17 +89,19 @@ class Shell2HTTP(object):
                   For example,
                   if you pass ``{ "args": ["Hello", "World"] }``
                   in POST request, it gets converted to ``echo Hello World``.\n
-            callback_fn (func):
+            callback_fn (Callable[[Dict, Future], Any]):
                 - An optional function that is invoked when a requested process
                     to this endpoint completes execution.
                 - This is added as a
                     ``concurrent.Future.add_done_callback(fn=callback_fn)``
-                - A same callback function may be used for multiple commands.
+                - The same callback function may be used for multiple commands.
+                - if request JSON contains a `callback_context` attr, it will be passed
+                  as the first argument to this function.
 
         Examples::
 
-            def my_callback_fn(future):
-                print(future.result())
+            def my_callback_fn(context: dict, future: Future) -> None:
+                print(future.result(), context)
 
             shell2http.register_command(endpoint="echo", command_name="echo")
             shell2http.register_command(
@@ -108,7 +110,7 @@ class Shell2HTTP(object):
                 callback_fn=my_callback_fn
             )
         """
-        uri = self.__construct_route(endpoint)
+        uri: str = self.__construct_route(endpoint)
         # make sure the given endpoint is not already registered
         cmd_already_exists = self.__commands.get(uri)
         if cmd_already_exists:

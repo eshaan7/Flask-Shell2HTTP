@@ -139,25 +139,26 @@ class RequestParser:
         logger.debug(f"Request files saved under temp directory: '{tmpdir}'")
         return args, tmpdir
 
-    def parse_req(self, request, base_command: str) -> (str, str):
+    def parse_req(self, request, base_command: str) -> (str, int, Dict, str):
+        # default values if request is w/o any data
+        # i.e. just run-script
         args: List[str] = []
+        timeout: int = DEFAULT_TIMEOUT
         tmpdir = None
+        callback_context = {}
         if request.is_json:
             # request does not contain a file
             args = request.json.get("args", [])
             timeout: int = request.json.get("timeout", DEFAULT_TIMEOUT)
+            callback_context = request.json.get("callback_context", {})
         elif request.files:
             # request contains file
+            callback_context = request.form.get("callback_context", {})
             received_args = request.form.getlist("args")
             timeout: int = request.form.get("timeout", DEFAULT_TIMEOUT)
             args, tmpdir = RequestParser.__parse_multipart_req(
                 received_args, request.files
             )
-        else:
-            # request is w/o any data
-            # i.e. just run-script
-            args = []
-            timeout: int = DEFAULT_TIMEOUT
 
         cmd: List[str] = base_command.split(" ")
         cmd.extend(args)
@@ -165,7 +166,7 @@ class RequestParser:
         if tmpdir:
             self.__tmpdirs.update({key: tmpdir})
 
-        return cmd, timeout, key
+        return cmd, timeout, callback_context, key
 
     def cleanup_temp_dir(self, future: Future) -> None:
         key: str = future.result().key

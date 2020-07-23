@@ -22,7 +22,7 @@ my_signal = signal_handler.signal(f"on_{CMD}_complete")
 
 
 @my_signal.connect
-def my_callback_fn(future: Future):
+def my_callback_fn(extra_callback_context, future: Future):
     """
     Will be invoked on every process completion
     """

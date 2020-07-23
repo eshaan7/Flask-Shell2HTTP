@@ -14,20 +14,22 @@ shell2http = Shell2HTTP(app, executor)
 ENDPOINT = "echo"
 
 
-def intercept_result(future: Future):
+def intercept_result(context, future: Future):
     """
     Will be invoked on every process completion
     """
     data = None
     if future.done():
-        with open("/path/to/saved/file") as f:
+        fname = context.get("read_result_from", None)
+        with open(fname) as f:
             data = f.read()
         # 1. get current result object
         res = future.result()
         # 2. update the report variable,
         # you may update only these: report,error,status
         res.report = data
-        res.status = "success"
+        if context.get("force_success", False):
+            res.status = "success"
         # 3. set new result
         future._result = res
 
@@ -42,7 +44,13 @@ if __name__ == "__main__":
     app.testing = True
     c = app.test_client()
     # request new process
-    data = {"args": ["hello", "world"]}
+    data = {
+        "args": ["hello", "world"],
+        "callback_context": {
+            "read_result_from": "/path/to/saved/file",
+            "force_success": True,
+        },
+    }
     r = c.post(f"/{ENDPOINT}", json=data)
     # get result
     result_url = r.get_json()["result_url"]
