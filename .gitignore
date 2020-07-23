@@ -3,6 +3,7 @@ venv/
 virtualenv/
 __pycache__/
 app.py
+test.py
 build/
 dist/
 *.egg-info
