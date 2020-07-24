@@ -84,9 +84,8 @@ Returns result in JSON,
   "start_time": 1593019807.7754705,
   "end_time": 1593019807.782958,
   "process_time": 0.00748753547668457,
-  "status": "success",
   "returncode": 0,
-  "error": "",
+  "error": null,
 }
 ```
 
