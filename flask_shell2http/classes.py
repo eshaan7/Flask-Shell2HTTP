@@ -35,27 +35,23 @@ def run_command(cmd: List[str], timeout: int, key: str) -> Dict:
         A Concurrent.Future object where future.result() is the report
     """
     start_time: float = time.time()
-    status: str = "failed"
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
     try:
-        p = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text="ascii",
-            timeout=timeout,
-        )
-        stdout, stderr, returncode = p.stdout, p.stderr, p.returncode
-        if returncode == 0:
-            status = "success"
-        elif stderr and stdout:
-            status = "reported_with_fails"
-        elif stdout and not stderr:
-            status = "success"
+        outs, errs = proc.communicate(timeout=int(timeout))
+        stdout = outs.decode("ascii")
+        stderr = errs.decode("ascii")
+        returncode = proc.returncode
+        logger.info(f"Job: '{key}' --> finished with returncode: '{returncode}'.")
 
-        logger.info(f"Job: '{key}' --> finished with status: '{status}'.")
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        stdout, _ = [s.decode("ascii") for s in proc.communicate()]
+        stderr = f"command timedout after {timeout} seconds."
+        returncode = proc.returncode
+        logger.error(f"Job: '{key}' --> failed. Reason: \"{stderr}\".")
 
     except Exception as e:
-        status = "failed"
+        proc.kill()
         returncode = -1
         stdout = None
         stderr = str(e)
@@ -67,7 +63,6 @@ def run_command(cmd: List[str], timeout: int, key: str) -> Dict:
         key=key,
         report=stdout,
         error=stderr,
-        status=status,
         returncode=returncode,
         start_time=start_time,
         end_time=end_time,
