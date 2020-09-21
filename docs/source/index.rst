@@ -20,6 +20,7 @@ A minimalist Flask_ extension that serves as a RESTful/HTTP wrapper for python's
 - Can also process multiple uploaded files in one command.
 - This is useful for internal docker-to-docker communications if you have different binaries distributed in micro-containers.
 - You can define a callback function/ use signals to listen for process completion.
+- You can also apply View Decorators to the exposed endpoint.
 - Currently, all commands run asynchronously (default timeout is 3600 seconds), so result is not available directly. An option _may_ be provided for this in future release.
 
    `Note: This extension is primarily meant for executing long-running 

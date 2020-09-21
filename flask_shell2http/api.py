@@ -7,8 +7,8 @@
 """
 
 # system imports
-from http import HTTPStatus
 import functools
+from http import HTTPStatus
 from typing import Callable, Dict, Any
 
 # web imports

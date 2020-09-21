@@ -1,6 +1,6 @@
 # system imports
 from collections import OrderedDict
-from typing import Callable, Dict, Any
+from typing import Callable, Dict, List, Any
 
 # web imports
 from flask_executor import Executor
@@ -75,6 +75,7 @@ class Shell2HTTP(object):
         endpoint: str,
         command_name: str,
         callback_fn: Callable[[Dict, Future], Any] = None,
+        decorators: List = [],
     ) -> None:
         """
         Function to map a shell command to an endpoint.
@@ -97,6 +98,9 @@ class Shell2HTTP(object):
                 - The same callback function may be used for multiple commands.
                 - if request JSON contains a `callback_context` attr, it will be passed
                   as the first argument to this function.
+            decorators (List[Callable]):
+                - A List of view decorators to apply to the endpoint.
+                - *New in version v1.5.0*
 
         Examples::
 
@@ -107,7 +111,8 @@ class Shell2HTTP(object):
             shell2http.register_command(
                 endpoint="myawesomescript",
                 command_name="./fuxsocy.py",
-                callback_fn=my_callback_fn
+                callback_fn=my_callback_fn,
+                decorators=[],
             )
         """
         uri: str = self.__construct_route(endpoint)
@@ -121,14 +126,18 @@ class Shell2HTTP(object):
             return None
 
         # else, add new URL rule
+        view_func = shell2httpAPI.as_view(
+            endpoint,
+            command_name=command_name,
+            user_callback_fn=callback_fn,
+            executor=self.__executor,
+        )
+        # apply decorators, if any
+        for dec in decorators:
+            view_func = dec(view_func)
+        # register URL rule
         self.app.add_url_rule(
-            uri,
-            view_func=shell2httpAPI.as_view(
-                endpoint,
-                command_name=command_name,
-                user_callback_fn=callback_fn,
-                executor=self.__executor,
-            ),
+            uri, view_func=view_func,
         )
         self.__commands.update({uri: command_name})
         logger.info(f"New endpoint: '{uri}' registered for command: '{command_name}'.")
