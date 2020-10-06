@@ -17,7 +17,7 @@ GITHUB_URL = "https://github.com/eshaan7/flask-shell2http"
 
 setup(
     name="Flask-Shell2HTTP",
-    version="1.5.0",
+    version="1.5.1",
     url=GITHUB_URL,
     license="BSD",
     author="Eshaan Bansal",
