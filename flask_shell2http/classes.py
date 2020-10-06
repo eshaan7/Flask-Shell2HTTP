@@ -38,14 +38,14 @@ def run_command(cmd: List[str], timeout: int, key: str) -> Dict:
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
     try:
         outs, errs = proc.communicate(timeout=int(timeout))
-        stdout = outs.decode("ascii")
-        stderr = errs.decode("ascii")
+        stdout = outs.decode("utf-8")
+        stderr = errs.decode("utf-8")
         returncode = proc.returncode
         logger.info(f"Job: '{key}' --> finished with returncode: '{returncode}'.")
 
     except subprocess.TimeoutExpired:
         proc.kill()
-        stdout, _ = [s.decode("ascii") for s in proc.communicate()]
+        stdout, _ = [s.decode("utf-8") for s in proc.communicate()]
         stderr = f"command timedout after {timeout} seconds."
         returncode = proc.returncode
         logger.error(f"Job: '{key}' --> failed. Reason: \"{stderr}\".")
