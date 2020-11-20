@@ -17,11 +17,10 @@ executor.init_app(app)
 shell2http = Shell2HTTP(base_url_prefix="/cmd/")
 shell2http.init_app(app, executor)
 
-ENDPOINT = "catthisformeplease"
-
-shell2http.register_command(endpoint=ENDPOINT, command_name="strings")
+shell2http.register_command(endpoint="strings", command_name="strings")
 
 
+# go to http://localhost:4000/ to execute
 @app.route("/")
 def test():
     """
@@ -32,7 +31,7 @@ def test():
     $ strings /tmp/inputfile /tmp/someotherfile
     ```
     """
-    url = f"http://localhost:4000/cmd/{ENDPOINT}"
+    url = "http://localhost:4000/cmd/strings"
     # create and read dummy data from temporary files
     with tempfile.TemporaryFile() as fp:
         fp.write(b"Hello world!")
