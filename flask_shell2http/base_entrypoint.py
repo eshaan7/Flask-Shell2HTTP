@@ -7,7 +7,7 @@ from flask_executor import Executor
 from flask_executor.futures import Future
 
 # lib imports
-from .api import shell2httpAPI
+from .api import Shell2HttpAPI
 from .helpers import get_logger
 
 
@@ -126,7 +126,7 @@ class Shell2HTTP(object):
             return None
 
         # else, add new URL rule
-        view_func = shell2httpAPI.as_view(
+        view_func = Shell2HttpAPI.as_view(
             endpoint,
             command_name=command_name,
             user_callback_fn=callback_fn,

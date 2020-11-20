@@ -7,6 +7,7 @@
     {
       "args": ["hello", "world"],
       "timeout": 60,
+      "force_unique_key": true,
       "callback_context": {
         "read_result_from": "/path/to/saved/file",
         "force_success": true
@@ -29,6 +30,12 @@
       "title": "subprocess timeout in seconds",
       "description": "Maximum timeout after which subprocess fails if not already complete.",
       "default": 3600
+    },
+    "force_unique_key": {
+      "type": "boolean",
+      "title": "Flag to enable/disable internal rate limiting mechanism",
+      "description": "By default, the key is the SHA1 sum of the command + args POSTed to the API. This is done as a rate limiting measure so as to prevent multiple jobs with same parameters, if one such job is already running. If force_unique_key is set to true, the API will bypass this default behaviour and a psuedorandom key will be returned instead",
+      "default": false
     },
     "callback_context": {
       "type": "object",

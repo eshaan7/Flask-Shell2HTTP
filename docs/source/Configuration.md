@@ -1,4 +1,14 @@
-## Logging Configuration
+## Configuration
+
+### POST Request Options
+
+One can read [post-request-schema.json](https://github.com/Eshaan7/Flask-Shell2HTTP/blob/master/post-request-schema.json)
+to see and understand the various _optional_ tweaks which can be done when making requests to the API. 
+
+There are many [example programs](Examples.md) with client requests given which demonstrate these different behaviours.
+
+
+### Logging Configuration
 
 This extension logs messages of different severity `INFO`, `DEBUG`, `ERROR` 
 using the python's inbuilt [logging](https://docs.python.org/3/library/logging.html) module.

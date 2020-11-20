@@ -41,7 +41,8 @@ if __name__ == "__main__":
     # make new request for a command with arguments
     uri = f"/cmd/{ENDPOINT_AND_CMD}"
     # timeout in seconds, default value is 3600
-    data = {"args": ["hello", "world"], "timeout": 60}
+    # force_unique_key disables rate-limiting
+    data = {"args": ["hello", "world"], "timeout": 60, "force_unique_key": True}
     resp1 = c.post(uri, json=data).get_json()
     print(resp1)
     # fetch result

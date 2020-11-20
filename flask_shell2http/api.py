@@ -18,15 +18,15 @@ from flask_executor import Executor
 from flask_executor.futures import Future
 
 # lib imports
-from .classes import RequestParser, run_command
+from .classes import RunnerParser
 from .helpers import get_logger
 
 
 logger = get_logger()
-request_parser = RequestParser()
+runner_parser = RunnerParser()
 
 
-class shell2httpAPI(MethodView):
+class Shell2HttpAPI(MethodView):
     """
     Flask.MethodView that registers GET and POST methods for a given endpoint.
     This is invoked on `Shell2HTTP.register_command`.
@@ -75,16 +75,20 @@ class shell2httpAPI(MethodView):
                 f"Requester: '{request.remote_addr}'."
             )
             # Check if request data is correct and parse it
-            cmd, timeout, callback_context, key = request_parser.parse_req(
+            cmd, timeout, callback_context, key = runner_parser.parse_req(
                 request, self.command_name
             )
 
             # run executor job in background
             future = self.executor.submit_stored(
-                future_key=key, fn=run_command, cmd=cmd, timeout=timeout, key=key,
+                future_key=key,
+                fn=runner_parser.run_command,
+                cmd=cmd,
+                timeout=timeout,
+                key=key,
             )
             # callback that removes the temporary directory
-            future.add_done_callback(request_parser.cleanup_temp_dir)
+            future.add_done_callback(runner_parser.cleanup_temp_dir)
             if self.user_callback_fn:
                 # user defined callback fn with callback_context if any
                 future.add_done_callback(

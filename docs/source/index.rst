@@ -36,7 +36,7 @@ more detailed :doc:`Examples` that shows different use-cases for this package.
    
    Quickstart
    Examples
-   Logging
+   Configuration
 
 API Reference
 -------------------------------

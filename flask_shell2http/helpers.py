@@ -1,5 +1,9 @@
 import logging
+import hashlib
+import uuid
 from typing import List
+
+from flask import current_app
 
 DEFAULT_TIMEOUT = 3600
 
@@ -17,6 +21,12 @@ def list_replace(lst: List, old, new) -> None:
         pass
 
 
+def gen_key(lst: List, randomize=False) -> str:
+    if randomize:
+        return str(uuid.uuid4())[:8]
+    return calc_hash(lst)[:8]
+
+
 def calc_hash(lst: List) -> str:
     """
     Internal use only.
@@ -24,8 +34,9 @@ def calc_hash(lst: List) -> str:
     This is for non-cryptographic purpose,
     that's why a faster and insecure hashing algorithm is chosen.
     """
-    to_hash = " ".join(lst).encode("ascii")
-    return __import__("hashlib").sha1(to_hash).hexdigest()[:8]
+    current_app.config.get("Shell2HTTP_")
+    to_hash = " ".join(lst).encode("utf-8")
+    return hashlib.sha1(to_hash).hexdigest()
 
 
 def get_logger() -> logging.Logger:
