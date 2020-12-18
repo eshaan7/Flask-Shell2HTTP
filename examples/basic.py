@@ -23,9 +23,8 @@ logger.setLevel(logging.INFO)
 executor = Executor(app)
 shell2http = Shell2HTTP(app, executor, base_url_prefix="/cmd/")
 
-ENDPOINT_AND_CMD = "echo"
-
-shell2http.register_command(endpoint=ENDPOINT_AND_CMD, command_name=ENDPOINT_AND_CMD)
+ENDPOINT = "echo"
+shell2http.register_command(endpoint=ENDPOINT, command_name=ENDPOINT)
 
 
 # Test Runner
@@ -39,7 +38,7 @@ if __name__ == "__main__":
     ```
     """
     # make new request for a command with arguments
-    uri = f"/cmd/{ENDPOINT_AND_CMD}"
+    uri = f"/cmd/{ENDPOINT}"
     # timeout in seconds, default value is 3600
     # force_unique_key disables rate-limiting
     data = {"args": ["hello", "world"], "timeout": 60, "force_unique_key": True}
