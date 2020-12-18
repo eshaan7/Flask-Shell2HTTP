@@ -6,11 +6,11 @@ Execute shell commands asynchronously and safely from flask's endpoints.
 
 ##### Docs & Example usage on GitHub: https://github.com/eshaan7/flask-shell2http
 """
+import pathlib
 from setuptools import setup
 
-
-with open("README.md", encoding="utf-8") as f:
-    long_description = f.read()
+# The text of the README file
+README = (pathlib.Path(__file__).parent / "README.md").read_text()
 
 GITHUB_URL = "https://github.com/eshaan7/flask-shell2http"
 
@@ -23,7 +23,7 @@ setup(
     author="Eshaan Bansal",
     author_email="eshaan7bansal@gmail.com",
     description="A minimalist REST API wrapper for python's subprocess API.",
-    long_description=long_description,
+    long_description=README,
     long_description_content_type="text/markdown",
     py_modules=["flask_shell2http"],
     zip_safe=False,
@@ -47,5 +47,19 @@ setup(
         "Funding": "https://www.paypal.me/eshaanbansal",
         "Source": GITHUB_URL,
         "Tracker": "{}/issues".format(GITHUB_URL),
+    },
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). You can install these using the following syntax,
+    # for example:
+    # $ pip install -e .[dev,test]
+    extras_require={
+        "test": [
+            "flask_testing",
+            "black==20.8b1",
+            "flake8",
+            "nose",
+            "blinker",
+            "requests",
+        ],
     },
 )
