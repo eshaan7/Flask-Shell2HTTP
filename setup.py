@@ -55,11 +55,12 @@ setup(
     extras_require={
         "test": [
             "flask_testing",
-            "black==20.8b1",
+            "black==19.10b0",
             "flake8",
             "nose",
             "blinker",
             "requests",
+            "codecov",
         ],
     },
 )

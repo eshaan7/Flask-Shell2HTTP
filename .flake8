@@ -6,4 +6,6 @@ ignore =
 exclude =
     Dockerfile,
     venv,
-    virtualenv
+    virtualenv,
+    .tox*,
+    isort*,

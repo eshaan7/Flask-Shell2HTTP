@@ -9,9 +9,7 @@ app = Flask(__name__)
 
 # application factory
 executor = Executor(app)
-shell2http = Shell2HTTP(app, executor, base_url_prefix="/cmd/")
-
-ENDPOINT = "echo"
+shell2http = Shell2HTTP(app, executor)
 
 
 def my_callback_fn(extra_callback_context, future: Future):
@@ -26,7 +24,7 @@ def my_callback_fn(extra_callback_context, future: Future):
 
 
 shell2http.register_command(
-    endpoint=ENDPOINT, command_name=ENDPOINT, callback_fn=my_callback_fn
+    endpoint="echo/callback", command_name="echo", callback_fn=my_callback_fn
 )
 
 
@@ -36,7 +34,7 @@ if __name__ == "__main__":
     c = app.test_client()
     # request new process
     data = {"args": ["hello", "world"]}
-    c.post(f"cmd/{ENDPOINT}", json=data)
+    c.post("/echo/callback", json=data)
     # request another new process
     data = {"args": ["Hello", "Friend!"]}
-    c.post(f"cmd/{ENDPOINT}", json=data)
+    c.post("/echo/callback", json=data)

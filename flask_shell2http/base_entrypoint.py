@@ -137,8 +137,7 @@ class Shell2HTTP(object):
             view_func = dec(view_func)
         # register URL rule
         self.app.add_url_rule(
-            uri,
-            view_func=view_func,
+            uri, view_func=view_func,
         )
         self.__commands.update({uri: command_name})
         logger.info(f"New endpoint: '{uri}' registered for command: '{command_name}'.")

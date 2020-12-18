@@ -1,6 +1,7 @@
 flask_testing
 blinker
 nose
+codecov
 black==19.10b0
 click==7.1.1
 flake8==3.8.3
