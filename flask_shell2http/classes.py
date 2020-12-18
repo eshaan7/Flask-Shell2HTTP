@@ -128,11 +128,7 @@ class RunnerParser:
             A Concurrent.Future object where future.result() is the report
         """
         start_time: float = time.time()
-        proc = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
         try:
             outs, errs = proc.communicate(timeout=int(timeout))
             stdout = outs.decode("utf-8")
