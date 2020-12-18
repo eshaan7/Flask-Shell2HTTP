@@ -4,7 +4,7 @@ from ._utils import CustomTestCase
 
 
 class TestCallbackAndSignal(CustomTestCase):
-    uri = "/cmd/echo"
+    uri = "/echo/signal"
 
     def create_app(self):
         app.config["TESTING"] = True
@@ -17,7 +17,7 @@ class TestCallbackAndSignal(CustomTestCase):
         def handler(sender, **kwargs):
             self.signal_was_called = True
 
-        data = {"args": ["hello", "world"]}
+        data = {"args": ["test_callback_fn_gets_called"]}
         # make request
         r1 = self.client.post(self.uri, json=data)
         # fetch report

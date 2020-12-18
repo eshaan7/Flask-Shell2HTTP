@@ -60,6 +60,7 @@ setup(
             "nose",
             "blinker",
             "requests",
+            "codecov",
         ],
     },
 )

@@ -10,13 +10,11 @@ app = Flask(__name__)
 
 # application factory
 executor = Executor(app)
-shell2http = Shell2HTTP(app, executor, base_url_prefix="/cmd/")
-
-CMD = "echo"
+shell2http = Shell2HTTP(app, executor)
 
 # Signal Handling
 signal_handler = Namespace()
-my_signal = signal_handler.signal(f"on_{CMD}_complete")
+my_signal = signal_handler.signal("on_echo_complete")
 # ..or any other name of your choice
 
 
@@ -35,7 +33,9 @@ def send_proxy(extra_callback_context, future: Future):
     )
 
 
-shell2http.register_command(endpoint=CMD, command_name=CMD, callback_fn=send_proxy)
+shell2http.register_command(
+    endpoint="echo/signal", command_name="echo", callback_fn=send_proxy
+)
 
 
 # Test Runner
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     c = app.test_client()
     # request new process
     data = {"args": ["Hello", "Friend!"]}
-    c.post(f"cmd/{CMD}", json=data)
+    c.post("/echo/signal", json=data)
     # request new process
     data = {"args": ["Bye", "Friend!"]}
-    c.post(f"cmd/{CMD}", json=data)
+    c.post("/echo/signal", json=data)
