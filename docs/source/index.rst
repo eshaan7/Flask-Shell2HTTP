@@ -1,9 +1,11 @@
 Welcome to Flask-Shell2HTTP!
 ================================
 
-.. image:: https://www.codefactor.io/repository/github/eshaan7/flask-shell2http/badge
 .. image:: https://img.shields.io/lgtm/grade/python/g/Eshaan7/Flask-Shell2HTTP.svg?logo=lgtm&logoWidth=18
 .. image:: https://img.shields.io/pypi/v/flask-shell2http
+.. image:: https://github.com/Eshaan7/Flask-Shell2HTTP/workflows/Linter%20&%20Tests/badge.svg?branch=master
+.. image:: https://codecov.io/gh/Eshaan7/Flask-Shell2HTTP/branch/master/graph/badge.svg?token=UQ43PYQPMR
+.. image:: https://www.codefactor.io/repository/github/eshaan7/flask-shell2http/badge
 
 A minimalist Flask_ extension that serves as a RESTful/HTTP wrapper for python's subprocess API.
 
