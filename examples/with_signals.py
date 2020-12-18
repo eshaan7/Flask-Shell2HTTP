@@ -12,7 +12,6 @@ app = Flask(__name__)
 executor = Executor(app)
 shell2http = Shell2HTTP(app, executor, base_url_prefix="/cmd/")
 
-ENDPOINT = "echo"
 CMD = "echo"
 
 # Signal Handling
@@ -22,7 +21,7 @@ my_signal = signal_handler.signal(f"on_{CMD}_complete")
 
 
 @my_signal.connect
-def my_callback_fn(extra_callback_context, future: Future):
+def my_callback_fn(sender, extra_callback_context, future: Future):
     """
     Will be invoked on every process completion
     """
@@ -30,9 +29,13 @@ def my_callback_fn(extra_callback_context, future: Future):
     print("Result: ", future.result())
 
 
-shell2http.register_command(
-    endpoint=ENDPOINT, command_name=CMD, callback_fn=my_signal.send
-)
+def send_proxy(extra_callback_context, future: Future):
+    my_signal.send(
+        "send_proxy", extra_callback_context=extra_callback_context, future=future
+    )
+
+
+shell2http.register_command(endpoint=CMD, command_name=CMD, callback_fn=send_proxy)
 
 
 # Test Runner
@@ -41,7 +44,7 @@ if __name__ == "__main__":
     c = app.test_client()
     # request new process
     data = {"args": ["Hello", "Friend!"]}
-    c.post(f"cmd/{ENDPOINT}", json=data)
+    c.post(f"cmd/{CMD}", json=data)
     # request new process
     data = {"args": ["Bye", "Friend!"]}
-    c.post(f"cmd/{ENDPOINT}", json=data)
+    c.post(f"cmd/{CMD}", json=data)
