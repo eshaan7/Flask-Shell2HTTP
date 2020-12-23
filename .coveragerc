@@ -1,4 +1,3 @@
-
 [run]
 branch = True
 source = flask-shell2http
@@ -13,4 +12,5 @@ exclude_lines =
     if __name__ == .__main__.:
 ignore_errors = True
 omit =
+    examples/*
     tests/*
