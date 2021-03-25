@@ -24,7 +24,7 @@ A minimalist [Flask](https://github.com/pallets/flask) extension that serves as 
 - Set a script that runs on a succesful POST request to an endpoint of your choice. See [Example code](examples/run_script.py).
 - Map a base command to an endpoint and pass dynamic arguments to it. See [Example code](examples/basic.py).
 - Can also process multiple uploaded files in one command. See [Example code](examples/multiple_files.py).
-- This is useful for internal docker-to-docker communications if you have different binaries distributed in micro-containers. See [real-life example](https://github.com/intelowlproject/IntelOwl/blob/develop/integrations/peframe/app.py).
+- This is useful for internal docker-to-docker communications if you have different binaries distributed in micro-containers. See [real-life example](https://github.com/intelowlproject/IntelOwl/blob/master/integrations/static_analyzers/app.py).
 - You can define a callback function/ use signals to listen for process completion. See [Example code](examples/with_callback.py). 
   * Maybe want to pass some additional context to the callback function ? 
   * Maybe intercept on completion and update the result ? See [Example code](examples/custom_save_fn.py)
