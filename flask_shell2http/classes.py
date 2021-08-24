@@ -4,7 +4,7 @@ import json
 import subprocess
 import tempfile
 import shutil
-from typing import List, Dict
+from typing import List, Dict, Tuple, Any, Optional
 
 # web imports
 from flask.helpers import safe_join
@@ -27,7 +27,7 @@ class RunnerParser:
     __tmpdirs: Dict[str, str] = {}
 
     @staticmethod
-    def __parse_multipart_req(args: List[str], files) -> (List[str], str):
+    def __parse_multipart_req(args: List[str], files) -> Tuple[List[str], str]:
         # Check if file part exists
         fnames = []
         for arg in args:
@@ -57,26 +57,28 @@ class RunnerParser:
         logger.debug(f"Request files saved under temp directory: '{tmpdir}'")
         return args, tmpdir
 
-    def parse_req(self, request, base_command: str) -> (str, int, Dict, str):
+    def parse_req(
+        self, request, base_command: str
+    ) -> Tuple[List[str], int, Dict[str, Any], str]:
         # default values if request is w/o any data
         # i.e. just run-script
         tmpdir = None
         # default values
         args: List[str] = []
         timeout: int = DEFAULT_TIMEOUT
-        callback_context = {}
+        callback_context: Dict[str, Any] = {}
         randomize_key = False
         if request.is_json:
             # request does not contain a file
             args = request.json.get("args", [])
-            timeout: int = request.json.get("timeout", DEFAULT_TIMEOUT)
+            timeout = request.json.get("timeout", DEFAULT_TIMEOUT)
             callback_context = request.json.get("callback_context", {})
             randomize_key = request.json.get("force_unique_key", False)
         elif request.files:
             # request contains file and form_data
             data = json.loads(request.form.get("request_json", "{}"))
             received_args = data.get("args", [])
-            timeout: int = data.get("timeout", DEFAULT_TIMEOUT)
+            timeout = data.get("timeout", DEFAULT_TIMEOUT)
             callback_context = data.get("callback_context", {})
             randomize_key = data.get("force_unique_key", False)
             args, tmpdir = self.__parse_multipart_req(received_args, request.files)
@@ -90,10 +92,10 @@ class RunnerParser:
         return cmd, timeout, callback_context, key
 
     def cleanup_temp_dir(self, future: Future) -> None:
-        key: str = future.result().get("key", None)
+        key: Optional[str] = future.result().get("key", None)
         if not key:
             return None
-        tmpdir: str = self.__tmpdirs.get(key, None)
+        tmpdir: Optional[str] = self.__tmpdirs.get(key, None)
         if not tmpdir:
             return None
 
@@ -110,7 +112,7 @@ class RunnerParser:
             )
 
     @staticmethod
-    def run_command(cmd: List[str], timeout: int, key: str) -> Dict:
+    def run_command(cmd: List[str], timeout: int, key: str) -> Dict[str, Any]:
         """
         This function is called by the executor to run given command
         using a subprocess asynchronously.
@@ -122,7 +124,7 @@ class RunnerParser:
         :param timeout: int
             maximum timeout in seconds (default = 3600)
 
-        :rtype: Dict
+        :rtype: Dict[str, Any]
 
         :returns:
             A Concurrent.Future object where future.result() is the report
@@ -133,6 +135,9 @@ class RunnerParser:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        stdout: Optional[str] = None
+        stderr: Optional[str] = None
+        returncode: int = 0
         try:
             outs, errs = proc.communicate(timeout=int(timeout))
             stdout = outs.decode("utf-8")
