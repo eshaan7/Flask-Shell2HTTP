@@ -27,7 +27,7 @@ copyright = "2020, Eshaan Bansal"
 author = "Eshaan Bansal"
 
 # The full version, including alpha/beta/rc tags
-release = (pathlib.Path(__file__).parent.parent / "version.txt").read_text()
+release = (pathlib.Path(__file__).parent.parent.parent / "version.txt").read_text()
 
 
 # -- General configuration ---------------------------------------------------
