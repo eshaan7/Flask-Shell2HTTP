@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import pathlib
 
 from pallets_sphinx_themes import ProjectLink
 
@@ -26,7 +27,7 @@ copyright = "2020, Eshaan Bansal"
 author = "Eshaan Bansal"
 
 # The full version, including alpha/beta/rc tags
-release = "1.6.0"
+release = (pathlib.Path(__file__).parent.parent / "version.txt").read_text()
 
 
 # -- General configuration ---------------------------------------------------
