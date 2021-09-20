@@ -61,6 +61,8 @@ class TestBasic(CustomTestCase):
         )
         r2_json = r2.get_json()
         self.assertIn("error", r2_json)
+        self.assertIn("key", r2_json)
+        self.assertIn("result_url", r2_json)
 
     def test_duplicate_request_after_report_fetch(self):
         data = {"args": ["test_duplicate_request_after_report_fetch"]}
@@ -72,7 +74,8 @@ class TestBasic(CustomTestCase):
         # now make 2nd request
         r2 = self.client.post(self.uri, json=data)
         r2_json = r2.get_json()
-        self.assertEqual(r2_json["key"], r1_json["key"])
+        # should have same response
+        self.assertDictEqual(r2_json, r1_json)
 
     def test_force_unique_key(self):
         data = {"args": ["test_force_unique_key"]}
