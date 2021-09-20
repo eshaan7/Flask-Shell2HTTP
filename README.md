@@ -34,14 +34,15 @@ A minimalist [Flask](https://github.com/pallets/flask) extension that serves as 
 > Note: This extension is primarily meant for executing long-running
 > shell commands/scripts (like nmap, code-analysis' tools) in background from an HTTP request and getting the result at a later time.
 
+
 ## Documentation
 
 [![Documentation Status](https://readthedocs.org/projects/flask-shell2http/badge/?version=latest)](https://flask-shell2http.readthedocs.io/en/latest/?badge=latest)
 
-Read the [Quickstart](https://flask-shell2http.readthedocs.io/en/stable/Quickstart.html) 
-from the [documentation](https://flask-shell2http.readthedocs.io/) to get started!
+- Read the [Quickstart](https://flask-shell2http.readthedocs.io/en/stable/Quickstart.html) from the [documentation](https://flask-shell2http.readthedocs.io/) to get started!
+- I also highly recommend the [Examples](https://flask-shell2http.readthedocs.io/en/stable/Examples.html) section.
+- [CHANGELOG](https://github.com/intelowlproject/IntelOwl/blob/master/.github/CHANGELOG.md).
 
-I highly recommend the [Examples](https://flask-shell2http.readthedocs.io/en/stable/Examples.html) section.
 
 ## Quick Start
 
@@ -133,6 +134,7 @@ Returns result in JSON,
   "error": null,
 }
 ```
+
 
 ## Inspiration
 
