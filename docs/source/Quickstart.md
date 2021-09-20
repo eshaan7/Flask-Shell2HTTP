@@ -57,8 +57,6 @@ print("Result:", resp.json())
 
 </details>
 
-> Note: You can see the JSON schema for the POST request [here](https://github.com/Eshaan7/Flask-Shell2HTTP/blob/master/post-request-schema.json).
-
 returns JSON,
 
 ```json
@@ -88,6 +86,17 @@ Returns result in JSON,
   "error": null,
 }
 ```
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+You can see the JSON schema for the POST request, <a href="https://github.com/Eshaan7/Flask-Shell2HTTP/blob/master/post-request-schema.json" target="_blank">here</a>.
+</div>
+
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+By default, the <code>key</code> is the SHA1 sum of the <code>command + args</code> POSTed to the API. This is done as a rate limiting measure so as to prevent multiple jobs with same parameters, if one such job is already running. If <code>force_unique_key</code> is set to <code>true</code>, the API will bypass this default behaviour and a psuedorandom key will be returned instead.
+</div>
+
 
 ##### Bonus
 
