@@ -41,7 +41,7 @@ A minimalist [Flask](https://github.com/pallets/flask) extension that serves as 
 
 - Read the [Quickstart](https://flask-shell2http.readthedocs.io/en/stable/Quickstart.html) from the [documentation](https://flask-shell2http.readthedocs.io/) to get started!
 - I also highly recommend the [Examples](https://flask-shell2http.readthedocs.io/en/stable/Examples.html) section.
-- [CHANGELOG](https://github.com/intelowlproject/IntelOwl/blob/master/.github/CHANGELOG.md).
+- [CHANGELOG](https://github.com/eshaan7/Flask-Shell2HTTP/blob/master/.github/CHANGELOG.md).
 
 
 ## Quick Start
