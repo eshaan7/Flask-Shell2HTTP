@@ -20,7 +20,7 @@ from flask_executor.futures import Future
 # lib imports
 from .classes import RunnerParser
 from .helpers import get_logger
-
+from .exceptions import JobNotFoundException, JobStillRunningException
 
 logger = get_logger()
 runner_parser = RunnerParser()
@@ -34,8 +34,9 @@ class Shell2HttpAPI(MethodView):
     """
 
     def get(self):
+        key: str = ""
         try:
-            key: str = request.args.get("key")
+            key = request.args.get("key")
             logger.info(
                 f"Job: '{key}' --> Report requested. "
                 f"Requester: '{request.remote_addr}'."
@@ -46,12 +47,11 @@ class Shell2HttpAPI(MethodView):
             # get the future object
             future: Future = self.executor.futures._futures.get(key)
             if not future:
-                raise Exception(f"No report exists for key: '{key}'.")
+                raise JobNotFoundException(f"No report exists for key: '{key}'.")
 
             # check if job has been finished
             if not future.done():
-                logger.debug(f"Job: '{key}' --> still running.")
-                return make_response(jsonify(status="running", key=key), 200)
+                raise JobStillRunningException()
 
             # pop future object since it has been finished
             self.executor.futures.pop(key)
@@ -59,16 +59,32 @@ class Shell2HttpAPI(MethodView):
             # if yes, get result from store
             report: Dict = future.result()
             if not report:
-                raise Exception(f"Job: '{key}' --> No report exists.")
+                raise JobNotFoundException(f"Job: '{key}' --> No report exists.")
 
             logger.debug(f"Job: '{key}' --> Requested report: {report}")
             return jsonify(report)
 
-        except Exception as e:
+        except JobNotFoundException as e:
             logger.error(e)
             return make_response(jsonify(error=str(e)), HTTPStatus.NOT_FOUND)
 
+        except JobStillRunningException:
+            logger.debug(f"Job: '{key}' --> still running.")
+            return make_response(
+                jsonify(
+                    status="running",
+                    key=key,
+                    result_url=self.__build_result_url(key),
+                ),
+                HTTPStatus.OK,
+            )
+
+        except Exception as e:
+            logger.error(e)
+            return make_response(jsonify(error=str(e)), HTTPStatus.BAD_REQUEST)
+
     def post(self):
+        key: str = ""
         try:
             logger.info(
                 f"Received request for endpoint: '{request.url_rule}'. "
@@ -96,7 +112,7 @@ class Shell2HttpAPI(MethodView):
                 )
 
             logger.info(f"Job: '{key}' --> added to queue for command: {cmd}")
-            result_url = f"{request.base_url}?key={key}"
+            result_url = self.__build_result_url(key)
             return make_response(
                 jsonify(status="running", key=key, result_url=result_url),
                 HTTPStatus.ACCEPTED,
@@ -104,7 +120,15 @@ class Shell2HttpAPI(MethodView):
 
         except Exception as e:
             logger.error(e)
-            return make_response(jsonify(error=str(e)), HTTPStatus.BAD_REQUEST)
+            response_dict = {"error": str(e)}
+            if key:
+                response_dict["key"] = key
+                response_dict["result_url"] = self.__build_result_url(key)
+            return make_response(jsonify(response_dict), HTTPStatus.BAD_REQUEST)
+
+    @classmethod
+    def __build_result_url(cls, key: str) -> str:
+        return f"{request.base_url}?key={key}"
 
     def __init__(
         self,
