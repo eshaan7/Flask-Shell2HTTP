@@ -1,6 +1,3 @@
-# system imports
-import requests
-
 # web imports
 from flask import Flask
 from flask_executor import Executor
@@ -16,27 +13,20 @@ shell2http = Shell2HTTP(app, executor, base_url_prefix="/scripts/")
 shell2http.register_command(endpoint="hacktheplanet", command_name="./fuxsocy.py")
 
 
-# Example route. Go to "/" to execute.
-@app.route("/")
-def test():
+# Application Runner
+if __name__ == "__main__":
+    app.testing = True
+    c = app.test_client()
     """
     The final executed command becomes:
     ```bash
     $ ./fuxsocy.py
     ```
     """
-    url = "http://localhost:4000/scripts/hacktheplanet"
-    # request without any data
-    resp = requests.post(url)
-    resp_data = resp.json()
-    print(resp_data)
-    key = resp_data["key"]
-    if key:
-        report = requests.get(f"{url}?key={key}")
-        return report.json()
-    return resp_data
-
-
-# Application Runner
-if __name__ == "__main__":
-    app.run(port=4000)
+    uri = "/scripts/hacktheplanet"
+    resp1 = c.post(uri, json={"args": []}).get_json()
+    print(resp1)
+    # fetch result
+    result_url = resp1["result_url"]
+    resp2 = c.get(result_url).get_json()
+    print(resp2)

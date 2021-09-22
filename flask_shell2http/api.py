@@ -140,7 +140,7 @@ class Shell2HttpAPI(MethodView):
 
     @classmethod
     def __build_result_url(cls, key: str) -> str:
-        return f"{request.base_url}?key={key}"
+        return f"{request.base_url}?key={key}&wait=false"
 
     def __init__(
         self,

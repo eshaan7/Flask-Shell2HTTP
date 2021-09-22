@@ -45,6 +45,6 @@ if __name__ == "__main__":
     resp1 = c.post(uri, json=data).get_json()
     print(resp1)
     # fetch result
-    result_url = resp1["result_url"]
+    result_url = resp1["result_url"].replace("wait=false", "wait=true")
     resp2 = c.get(result_url).get_json()
     print(resp2)
