@@ -10,6 +10,7 @@ class TestBasic(CustomTestCase):
 
     def create_app(self):
         app.config["TESTING"] = True
+        shell2http.register_command(endpoint="sleep", command_name="sleep")
         return app
 
     def test_keys_and_basic_sanity(self):
@@ -33,8 +34,6 @@ class TestBasic(CustomTestCase):
         )
 
     def test_timeout_raises_error(self):
-        # register new command
-        shell2http.register_command(endpoint="sleep", command_name="sleep")
         # make request
         # timeout in seconds, default value is 3600
         r1 = self.client.post("/cmd/sleep", json={"args": ["5"], "timeout": 1})
@@ -54,8 +53,8 @@ class TestBasic(CustomTestCase):
 
     def test_duplicate_request_raises_error(self):
         data = {"args": ["test_duplicate_request_raises_error"]}
-        _ = self.client.post("/cmd/echo", json=data)
-        r2 = self.client.post("/cmd/echo", json=data)
+        _ = self.client.post(self.uri, json=data)
+        r2 = self.client.post(self.uri, json=data)
         self.assertStatus(
             r2, 400, message="future key would already exist thus bad request"
         )
@@ -84,3 +83,16 @@ class TestBasic(CustomTestCase):
         r2 = self.client.post(self.uri, json={**data, "force_unique_key": True})
         r2_json = r2.get_json()
         self.assertNotEqual(r2_json["key"], r1_json["key"])
+
+    def test_get_with_wait(self):
+        # 1. POST request
+        r1 = self.client.post("/cmd/sleep", json={"args": ["2"]})
+        r1_json = r1.get_json()
+        # 2. GET request with wait=True
+        r2 = self.client.get(r1_json["result_url"].replace("false", "true"))
+        r2_json = r2.get_json()
+        # 3. asserts
+        self.assertEqual(r2_json["key"], r1_json["key"])
+        self.assertEqual(r2_json["report"], "")
+        self.assertEqual(r2_json["error"], "")
+        self.assertEqual(r2_json["returncode"], 0)
