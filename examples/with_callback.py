@@ -36,5 +36,5 @@ if __name__ == "__main__":
     data = {"args": ["hello", "world"]}
     c.post("/echo/callback", json=data)
     # request another new process
-    data = {"args": ["Hello", "Friend!"]}
+    data = {"args": ["Hello", "Friend!"], "callback_context": {"testkey": "testvalue"}}
     c.post("/echo/callback", json=data)

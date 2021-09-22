@@ -110,7 +110,7 @@ returns JSON,
 ```json
 {
    "key": "ddbe0a94",
-   "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94",
+   "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94&wait=false",
    "status": "running"
 }
 ```
@@ -118,7 +118,7 @@ returns JSON,
 Then using this `key` you can query for the result or just by going to the `result_url`,
 
 ```bash
-$ curl http://localhost:4000/commands/saythis?key=ddbe0a94
+$ curl http://localhost:4000/commands/saythis?key=ddbe0a94&wait=true # wait=true so we do not have to poll
 ```
 
 Returns result in JSON,

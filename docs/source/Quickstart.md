@@ -50,7 +50,7 @@ $ curl -X POST -H 'Content-Type: application/json' -d '{"args": ["Hello", "World
 
 ```python
 # You can also add a timeout if you want, default value is 3600 seconds
-data = {"args": ["Hello", "World!"], "timeout": 60}
+data = {"args": ["Hello", "World!"], "timeout": 60, "force_unique_key": False}
 resp = requests.post("http://localhost:4000/commands/saythis", json=data)
 print("Result:", resp.json())
 ```
@@ -62,7 +62,7 @@ returns JSON,
 ```json
 {
    "key": "ddbe0a94",
-   "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94",
+   "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94&wait=false",
    "status": "running"
 }
 ```
@@ -70,7 +70,7 @@ returns JSON,
 Then using this `key` you can query for the result or just by going to the `result_url`,
 
 ```bash
-$ curl http://localhost:4000/commands/saythis?key=ddbe0a94
+$ curl http://localhost:4000/commands/saythis?key=ddbe0a94&wait=true # wait=true so we don't need to poll
 ```
 
 Returns result in JSON,
@@ -87,14 +87,21 @@ Returns result in JSON,
 }
 ```
 
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-You can see the JSON schema for the POST request, <a href="https://github.com/Eshaan7/Flask-Shell2HTTP/blob/master/post-request-schema.json" target="_blank">here</a>.
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+Use <code>wait=true</code> when you don't wish to hTTP poll and want the result in a single request only.
+This is especially ideal in case you specified a low <code>timeout</code> value in the <code>POST</code> request.
 </div>
+
 
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 By default, the <code>key</code> is the SHA1 sum of the <code>command + args</code> POSTed to the API. This is done as a rate limiting measure so as to prevent multiple jobs with same parameters, if one such job is already running. If <code>force_unique_key</code> is set to <code>true</code>, the API will bypass this default behaviour and a psuedorandom key will be returned instead.
+</div>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+You can see the full JSON schema for the POST request, <a href="https://github.com/Eshaan7/Flask-Shell2HTTP/blob/master/post-request-schema.json" target="_blank">here</a>.
 </div>
 
 

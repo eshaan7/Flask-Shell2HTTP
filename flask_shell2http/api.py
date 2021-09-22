@@ -28,15 +28,27 @@ runner_parser = RunnerParser()
 
 class Shell2HttpAPI(MethodView):
     """
-    Flask.MethodView that registers GET and POST methods for a given endpoint.
-    This is invoked on `Shell2HTTP.register_command`.
-    Internal use only.
+    ``Flask.MethodView`` that registers ``GET`` and ``POST``
+    methods for a given endpoint.
+    This is invoked on ``Shell2HTTP.register_command``.
+
+    *Internal use only.*
     """
 
     def get(self):
+        """
+        Args:
+            key (str):
+                - Future key
+            wait (str):
+                - If ``true``, then wait for future to finish and return result.
+        """
+
         key: str = ""
+        report: Dict = {}
         try:
             key = request.args.get("key")
+            wait = request.args.get("wait", "").lower() == "true"
             logger.info(
                 f"Job: '{key}' --> Report requested. "
                 f"Requester: '{request.remote_addr}'."
@@ -50,14 +62,14 @@ class Shell2HttpAPI(MethodView):
                 raise JobNotFoundException(f"No report exists for key: '{key}'.")
 
             # check if job has been finished
-            if not future.done():
+            if not wait and not future.done():
                 raise JobStillRunningException()
 
             # pop future object since it has been finished
             self.executor.futures.pop(key)
 
             # if yes, get result from store
-            report: Dict = future.result()
+            report = future.result()
             if not report:
                 raise JobNotFoundException(f"Job: '{key}' --> No report exists.")
 
@@ -128,7 +140,7 @@ class Shell2HttpAPI(MethodView):
 
     @classmethod
     def __build_result_url(cls, key: str) -> str:
-        return f"{request.base_url}?key={key}"
+        return f"{request.base_url}?key={key}&wait=false"
 
     def __init__(
         self,
