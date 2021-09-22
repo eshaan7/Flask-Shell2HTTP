@@ -2,6 +2,11 @@
 
 **[Get it on PyPi](https://pypi.org/project/Flask-Shell2HTTP/)**
 
+## [v1.8.0](https://github.com/eshaan7/Flask-Shell2HTTP/releases/tag/v1.8.0)
+
+- Allow `&wait=[false|true]` query parameter in `GET` request. Use `wait=true` when you don't wish to HTTP poll and want the result in a single request only.
+
+
 ## [v1.7.0](https://github.com/eshaan7/Flask-Shell2HTTP/releases/tag/v1.7.0)
 
 **For you:**
@@ -12,6 +17,7 @@
 **Internal:**
 - Much better and improved test cases via tox matrix for both major flask versions, 1.x and 2.x.
 - Much better overall type hinting.
+
 
 ## [v1.6.0](https://github.com/eshaan7/Flask-Shell2HTTP/releases/tag/v1.6.0)
 

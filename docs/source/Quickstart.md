@@ -87,19 +87,19 @@ Returns result in JSON,
 }
 ```
 
-<div class="admonition hint">
+<div id="hint-wait" class="admonition hint">
 <p class="admonition-title">Hint</p>
-Use <code>wait=true</code> when you don't wish to hTTP poll and want the result in a single request only.
+Use <code>wait=true</code> when you don't wish to HTTP poll and want the result in a single request only.
 This is especially ideal in case you specified a low <code>timeout</code> value in the <code>POST</code> request.
 </div>
 
 
-<div class="admonition hint">
+<div id="hint-key" class="admonition hint">
 <p class="admonition-title">Hint</p>
 By default, the <code>key</code> is the SHA1 sum of the <code>command + args</code> POSTed to the API. This is done as a rate limiting measure so as to prevent multiple jobs with same parameters, if one such job is already running. If <code>force_unique_key</code> is set to <code>true</code>, the API will bypass this default behaviour and a psuedorandom key will be returned instead.
 </div>
 
-<div class="admonition note">
+<div id="note-post-request" class="admonition note">
 <p class="admonition-title">Note</p>
 You can see the full JSON schema for the POST request, <a href="https://github.com/Eshaan7/Flask-Shell2HTTP/blob/master/post-request-schema.json" target="_blank">here</a>.
 </div>
