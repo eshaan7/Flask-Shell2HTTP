@@ -3,6 +3,7 @@ from collections import OrderedDict
 from typing import Callable, Dict, List, Any
 
 # web imports
+from flask import Blueprint
 from flask_executor import Executor
 from flask_executor.futures import Future
 
@@ -14,61 +15,56 @@ from .helpers import get_logger
 logger = get_logger()
 
 
-class Shell2HTTP(object):
+class Shell2HTTP(Blueprint):
     """
-    Flask-Shell2HTTP base entrypoint class.
-    The only public API available to users.
+    Flask-Shell2HTTP's base entrypoint. This is the only public API available to users.
+
+    This is a subclass of `Flask.Blueprint` so it accepts
+    all the same arguments and functionality of a generic ``Flask.Blueprint`` instance..
 
     Attributes:
-        app: Flask application instance.
-        executor: Flask-Executor instance
-        base_url_prefix (str): base prefix to apply to endpoints. Defaults to "/".
+        executor: ``flask_executor.Executor`` instance
+        import_name: The name of the blueprint package, usually
+            ``__name__``. This helps locate the ``root_path`` for the
+            blueprint.
+        static_folder: A folder with static files that should be
+            served by the blueprint's static route. The path is relative to
+            the blueprint's root path. Blueprint static files are disabled
+            by default.
+        static_url_path: The url to serve static files from.
+            Defaults to ``static_folder``. If the blueprint does not have
+            a ``url_prefix``, the app's static route will take precedence,
+            and the blueprint's static files won't be accessible.
+        template_folder: A folder with templates that should be added
+            to the app's template search path. The path is relative to the
+            blueprint's root path. Blueprint templates are disabled by
+            default. Blueprint templates have a lower precedence than those
+            in the app's templates folder.
+        url_prefix: A path to prepend to all of the blueprint's URLs,
+            to make them distinct from the rest of the app's routes.
+        subdomain: A subdomain that blueprint routes will match on by
+            default.
+        url_defaults: A dict of default values that blueprint routes
+            will receive by default.
+        root_path: By default, the blueprint will automatically this
+            based on ``import_name``. In certain situations this automatic
+            detection can fail, so the path can be specified manually
+            instead.
 
     Example::
 
         app = Flask(__name__)
         executor = Executor(app)
-        shell2http = Shell2HTTP(app=app, executor=executor, base_url_prefix="/tasks/")
+        shell2http = Shell2HTTP(executor, 'tasks', __name__, url_prefix="/tasks")
     """
 
-    __commands: "OrderedDict[str, str]" = OrderedDict()
-    __url_prefix: str = "/"
+    __commands: "OrderedDict[str, str]"
+    __executor: Executor
 
-    def __init__(
-        self, app=None, executor: Executor = None, base_url_prefix: str = "/"
-    ) -> None:
-        self.__url_prefix = base_url_prefix
-        if app and executor:
-            self.init_app(app, executor)
-
-    def init_app(self, app, executor: Executor) -> None:
-        """
-        For use with Flask's `Application Factory`_ method.
-
-        Example::
-
-            executor = Executor()
-            shell2http = Shell2HTTP(base_url_prefix="/commands/")
-            app = Flask(__name__)
-            executor.init_app(app)
-            shell2http.init_app(app=app, executor=executor)
-
-        .. _Application Factory:
-           https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/
-        """
-        self.app = app
-        self.__executor: Executor = executor
-        self.__init_extension()
-
-    def __init_extension(self) -> None:
-        """
-        Adds the Shell2HTTP() instance to `app.extensions` list.
-        For internal use only.
-        """
-        if not hasattr(self.app, "extensions"):
-            self.app.extensions = dict()
-
-        self.app.extensions["shell2http"] = self
+    def __init__(self, executor: Executor, *args, **kwargs):
+        self.__commands = OrderedDict()
+        self.__executor = executor
+        super().__init__(*args, **kwargs)
 
     def register_command(
         self,
@@ -78,11 +74,14 @@ class Shell2HTTP(object):
         decorators: List = [],
     ) -> None:
         """
-        Function to map a shell command to an endpoint.
+        Function to map a shell command to an endpoint or route.
+
+        This internally registers the route via the ``Blueprint.add_url_rule`` method
+        so you can enjoy all the same features and powers of a blueprint instance.
 
         Args:
             endpoint (str):
-                - your command would live here: ``/{base_url_prefix}/{endpoint}``
+                - your command would live here: ``/{url_prefix}/{endpoint}``
             command_name (str):
                 - The base command which can be executed from the given endpoint.
                 - If ``command_name='echo'``, then all arguments passed
@@ -115,15 +114,15 @@ class Shell2HTTP(object):
                 decorators=[],
             )
         """
-        uri: str = self.__construct_route(endpoint)
         # make sure the given endpoint is not already registered
-        cmd_already_exists = self.__commands.get(uri)
+        cmd_already_exists = self.__commands.get(endpoint)
         if cmd_already_exists:
-            logger.error(
+            err_msg = (
                 "Failed to register since given endpoint: "
                 f"'{endpoint}' already maps to command: '{cmd_already_exists}'."
             )
-            return None
+            logger.error(err_msg)
+            raise AssertionError(err_msg)
 
         # else, add new URL rule
         view_func = Shell2HttpAPI.as_view(
@@ -136,12 +135,15 @@ class Shell2HTTP(object):
         for dec in decorators:
             view_func = dec(view_func)
         # register URL rule
-        self.app.add_url_rule(
-            uri,
+        self.add_url_rule(
+            endpoint,
             view_func=view_func,
         )
-        self.__commands.update({uri: command_name})
-        logger.info(f"New endpoint: '{uri}' registered for command: '{command_name}'.")
+        self.__commands.update({endpoint: command_name})
+        logger.info(
+            f"New endpoint: '{self.url_prefix}/{endpoint}' "
+            f"registered for command: '{command_name}'."
+        )
 
     def get_registered_commands(self) -> "OrderedDict[str, str]":
         """
@@ -153,9 +155,3 @@ class Shell2HTTP(object):
             i.e. mapping of registered commands and their URLs.
         """
         return self.__commands
-
-    def __construct_route(self, endpoint: str) -> str:
-        """
-        For internal use only.
-        """
-        return self.__url_prefix + endpoint
