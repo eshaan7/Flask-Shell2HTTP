@@ -3,7 +3,7 @@ import io
 
 from examples.multiple_files import app
 
-from ._utils import CustomTestCase
+from tests._utils import CustomTestCase
 
 
 class TestMultipleFiles(CustomTestCase):
