@@ -9,7 +9,7 @@ _For urgent issues and priority support, visit [https://xscode.com/eshaan7/flask
 [![codecov](https://codecov.io/gh/Eshaan7/Flask-Shell2HTTP/branch/master/graph/badge.svg?token=UQ43PYQPMR)](https://codecov.io/gh/Eshaan7/flask-shell2http/)
 [![CodeFactor](https://www.codefactor.io/repository/github/eshaan7/flask-shell2http/badge)](https://www.codefactor.io/repository/github/eshaan7/flask-shell2http)
 <a href="https://lgtm.com/projects/g/Eshaan7/Flask-Shell2HTTP/context:python">
-  <img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/Eshaan7/Flask-Shell2HTTP.svg?logo=lgtm&logoWidth=18"/>
+<img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/Eshaan7/Flask-Shell2HTTP.svg?logo=lgtm&logoWidth=18"/>
 </a>
 
 A minimalist [Flask](https://github.com/pallets/flask) extension that serves as a RESTful/HTTP wrapper for python's subprocess API.
@@ -18,22 +18,19 @@ A minimalist [Flask](https://github.com/pallets/flask) extension that serves as 
 - Execute pre-defined shell commands asynchronously and securely via flask's endpoints with dynamic arguments, file upload, callback function capabilities.
 - Designed for binary to binary/HTTP communication, development, prototyping, remote control and [more](https://flask-shell2http.readthedocs.io/en/stable/Examples.html).
 
-
 ## Use Cases
 
 - Set a script that runs on a succesful POST request to an endpoint of your choice. See [Example code](examples/run_script.py).
 - Map a base command to an endpoint and pass dynamic arguments to it. See [Example code](examples/basic.py).
 - Can also process multiple uploaded files in one command. See [Example code](examples/multiple_files.py).
 - This is useful for internal docker-to-docker communications if you have different binaries distributed in micro-containers. See [real-life example](https://github.com/intelowlproject/IntelOwl/blob/master/integrations/static_analyzers/app.py).
-- You can define a callback function/ use signals to listen for process completion. See [Example code](examples/with_callback.py). 
-  * Maybe want to pass some additional context to the callback function ? 
-  * Maybe intercept on completion and update the result ? See [Example code](examples/custom_save_fn.py)
+- You can define a callback function/ use signals to listen for process completion. See [Example code](examples/with_callback.py).
+  - Maybe want to pass some additional context to the callback function ?
+  - Maybe intercept on completion and update the result ? See [Example code](examples/custom_save_fn.py)
 - You can also apply [View Decorators](https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/) to the exposed endpoint. See [Example code](examples/with_decorators.py).
-- Currently, all commands run asynchronously (default timeout is 3600 seconds), so result is not available directly. An option _may_ be provided for this in future releases for commands that return immediately.
 
 > Note: This extension is primarily meant for executing long-running
 > shell commands/scripts (like nmap, code-analysis' tools) in background from an HTTP request and getting the result at a later time.
-
 
 ## Documentation
 
@@ -43,14 +40,13 @@ A minimalist [Flask](https://github.com/pallets/flask) extension that serves as 
 - I also highly recommend the [Examples](https://flask-shell2http.readthedocs.io/en/stable/Examples.html) section.
 - [CHANGELOG](https://github.com/eshaan7/Flask-Shell2HTTP/blob/master/.github/CHANGELOG.md).
 
-
 ## Quick Start
 
 ##### Dependencies
 
-* Python: `>=v3.6`
-* [Flask](https://pypi.org/project/Flask/)
-* [Flask-Executor](https://pypi.org/project/Flask-Executor)
+- Python: `>=v3.6`
+- [Flask](https://pypi.org/project/Flask/)
+- [Flask-Executor](https://pypi.org/project/Flask-Executor)
 
 ##### Installation
 
@@ -109,9 +105,9 @@ returns JSON,
 
 ```json
 {
-   "key": "ddbe0a94",
-   "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94&wait=false",
-   "status": "running"
+  "key": "ddbe0a94",
+  "result_url": "http://localhost:4000/commands/saythis?key=ddbe0a94&wait=false",
+  "status": "running"
 }
 ```
 
@@ -131,10 +127,9 @@ Returns result in JSON,
   "end_time": 1593019807.782958,
   "process_time": 0.00748753547668457,
   "returncode": 0,
-  "error": null,
+  "error": null
 }
 ```
-
 
 ## Inspiration
 
