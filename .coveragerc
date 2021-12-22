@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = flask-shell2http
+source = flask_shell2http
 omit = 
     examples/*
 

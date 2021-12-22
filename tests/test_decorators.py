@@ -1,6 +1,6 @@
 from examples.with_decorators import app
 
-from ._utils import CustomTestCase
+from tests._utils import CustomTestCase
 
 
 class TestDecorators(CustomTestCase):

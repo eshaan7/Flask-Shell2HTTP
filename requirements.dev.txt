@@ -1,5 +1,4 @@
 flask_testing
-nose
 codecov
 tox
 tox-gh-actions

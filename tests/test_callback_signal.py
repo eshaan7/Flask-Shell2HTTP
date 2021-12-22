@@ -1,6 +1,6 @@
 from examples.with_signals import app, my_signal
 
-from ._utils import CustomTestCase
+from tests._utils import CustomTestCase
 
 
 class TestCallbackAndSignal(CustomTestCase):
