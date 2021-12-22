@@ -28,7 +28,7 @@ runner_parser = RunnerParser()
 
 class Shell2HttpAPI(MethodView):
     """
-    ``Flask.MethodView`` that registers ``GET`` and ``POST``
+    ``Flask.MethodView`` that creates ``GET``, ``POST`` and ``DELETE``
     methods for a given endpoint.
     This is invoked on ``Shell2HTTP.register_command``.
 
@@ -37,6 +37,7 @@ class Shell2HttpAPI(MethodView):
 
     def get(self):
         """
+        Get report by job key.
         Args:
             key (str):
                 - Future key
@@ -137,6 +138,41 @@ class Shell2HttpAPI(MethodView):
                 response_dict["key"] = key
                 response_dict["result_url"] = self.__build_result_url(key)
             return make_response(jsonify(response_dict), HTTPStatus.BAD_REQUEST)
+
+    def delete(self):
+        """
+        Cancel (if running) and delete job by job key.
+        Args:
+            key (str):
+                - Future key
+        """
+        try:
+            key = request.args.get("key")
+            logger.info(
+                f"Job: '{key}' --> deletion requested. "
+                f"Requester: '{request.remote_addr}'."
+            )
+            if not key:
+                raise Exception("No key provided in arguments.")
+
+            # get the future object
+            future: Future = self.executor.futures._futures.get(key)
+            if not future:
+                raise JobNotFoundException(f"No job exists for key: '{key}'.")
+
+            # cancel and delete from memory
+            future.cancel()
+            self.executor.futures.pop(key)
+
+            return make_response({}, HTTPStatus.NO_CONTENT)
+
+        except JobNotFoundException as e:
+            logger.error(e)
+            return make_response(jsonify(error=str(e)), HTTPStatus.NOT_FOUND)
+
+        except Exception as e:
+            logger.error(e)
+            return make_response(jsonify(error=str(e)), HTTPStatus.BAD_REQUEST)
 
     @classmethod
     def __build_result_url(cls, key: str) -> str:
