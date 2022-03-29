@@ -7,7 +7,7 @@ import shutil
 from typing import List, Dict, Tuple, Any, Optional
 
 # web imports
-from flask.helpers import safe_join
+from werkzeug.utils import safe_join
 from werkzeug.utils import secure_filename
 from flask_executor.futures import Future
 
