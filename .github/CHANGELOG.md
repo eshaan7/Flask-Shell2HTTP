@@ -2,6 +2,13 @@
 
 **[Get it on PyPi](https://pypi.org/project/Flask-Shell2HTTP/)**
 
+## [v1.9.1](https://github.com/eshaan7/Flask-Shell2HTTP/releases/tag/v1.9.1)
+
+Added support for Flask version >=2.1.0 .
+
+- Fix import errors. [[Issue 42](https://github.com/eshaan7/Flask-Shell2HTTP/issues/42)].
+- Fix dependency conflicts in `requirements.dev.txt` file.
+
 ## [v1.9.0](https://github.com/eshaan7/Flask-Shell2HTTP/releases/tag/v1.9.0)
 
 - It's now possible to request deletion/cancellation of jobs. [[Issue 38](https://github.com/eshaan7/Flask-Shell2HTTP/issues/38)].
