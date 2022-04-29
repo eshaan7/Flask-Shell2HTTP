@@ -7,8 +7,13 @@ import shutil
 from typing import List, Dict, Tuple, Any, Optional
 
 # web imports
-from werkzeug.utils import safe_join, secure_filename
 from flask_executor.futures import Future
+from werkzeug.utils import secure_filename
+
+try:
+    from flask.helpers import safe_join
+except ImportError:
+    from werkzeug.utils import safe_join
 
 # lib imports
 from .helpers import list_replace, gen_key, get_logger, DEFAULT_TIMEOUT
