@@ -1,6 +1,10 @@
 name: Linter & Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
   test:
@@ -13,6 +17,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -35,5 +42,10 @@ jobs:
         # run tests with coverage
         tox
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+    - name: Report test coverage to DeepSource
+      uses: deepsourcelabs/test-coverage-action@master
+      with:
+        key: python
+        coverage-file: coverage.xml
+        dsn: ${{ secrets.DEEPSOURCE_DSN }}
+        fail-ci-on-error: true
