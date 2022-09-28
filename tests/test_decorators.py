@@ -1,5 +1,4 @@
 from examples.with_decorators import app
-
 from tests._utils import CustomTestCase
 
 

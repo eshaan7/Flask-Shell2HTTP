@@ -1,8 +1,7 @@
-import json
 import io
+import json
 
 from examples.multiple_files import app
-
 from tests._utils import CustomTestCase
 
 

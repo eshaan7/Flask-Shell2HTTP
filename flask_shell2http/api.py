@@ -9,18 +9,18 @@
 # system imports
 import functools
 from http import HTTPStatus
-from typing import Callable, Dict, Any
+from typing import Any, Callable, Dict
 
 # web imports
-from flask import request, jsonify, make_response
+from flask import jsonify, make_response, request
 from flask.views import MethodView
 from flask_executor import Executor
 from flask_executor.futures import Future
 
 # lib imports
 from .classes import RunnerParser
-from .helpers import get_logger
 from .exceptions import JobNotFoundException, JobStillRunningException
+from .helpers import get_logger
 
 logger = get_logger()
 runner_parser = RunnerParser()

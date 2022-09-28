@@ -7,6 +7,7 @@ Execute shell commands asynchronously and safely from flask's endpoints.
 ##### Docs & Example usage on GitHub: https://github.com/eshaan7/flask-shell2http
 """
 import pathlib
+
 from setuptools import setup
 
 # The directory containing this file

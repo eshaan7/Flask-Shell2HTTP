@@ -1,5 +1,4 @@
 from examples.with_signals import app, my_signal
-
 from tests._utils import CustomTestCase
 
 
