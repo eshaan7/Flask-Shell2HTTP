@@ -2,8 +2,9 @@
 import functools
 
 # web imports
-from flask import Flask, request, g, abort, Response
+from flask import Flask, Response, abort, g, request
 from flask_executor import Executor
+
 from flask_shell2http import Shell2HTTP
 
 # Flask application instance

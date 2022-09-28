@@ -1,5 +1,4 @@
 from examples.deletion import app
-
 from tests._utils import CustomTestCase
 
 

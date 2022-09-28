@@ -1,6 +1,6 @@
 # system imports
 from collections import OrderedDict
-from typing import Callable, Dict, List, Any
+from typing import Any, Callable, Dict, List
 
 # web imports
 from flask_executor import Executor
@@ -9,7 +9,6 @@ from flask_executor.futures import Future
 # lib imports
 from .api import Shell2HttpAPI
 from .helpers import get_logger
-
 
 logger = get_logger()
 

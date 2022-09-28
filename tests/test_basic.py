@@ -1,8 +1,7 @@
 import time
 
 from examples.basic import app, shell2http
-
-from tests._utils import CustomTestCase, post_req_keys, get_req_keys
+from tests._utils import CustomTestCase, get_req_keys, post_req_keys
 
 
 class TestBasic(CustomTestCase):

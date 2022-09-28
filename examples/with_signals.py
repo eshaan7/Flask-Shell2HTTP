@@ -1,8 +1,9 @@
 # web imports
-from flask import Flask
 from blinker import Namespace  # or from flask.signals import Namespace
+from flask import Flask
 from flask_executor import Executor
 from flask_executor.futures import Future
+
 from flask_shell2http import Shell2HTTP
 
 # Flask application instance

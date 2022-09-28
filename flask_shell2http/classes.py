@@ -1,10 +1,10 @@
 # system imports
-import time
 import json
+import shutil
 import subprocess
 import tempfile
-import shutil
-from typing import List, Dict, Tuple, Any, Optional
+import time
+from typing import Any, Dict, List, Optional, Tuple
 
 # web imports
 from flask_executor.futures import Future
@@ -16,7 +16,7 @@ except ImportError:
     from werkzeug.utils import safe_join
 
 # lib imports
-from .helpers import list_replace, gen_key, get_logger, DEFAULT_TIMEOUT
+from .helpers import DEFAULT_TIMEOUT, gen_key, get_logger, list_replace
 
 logger = get_logger()
 
