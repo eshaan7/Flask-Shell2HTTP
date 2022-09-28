@@ -74,7 +74,7 @@ class Shell2HTTP(object):
         endpoint: str,
         command_name: str,
         callback_fn: Callable[[Dict, Future], Any] = None,
-        decorators: List = [],
+        decorators: List = None,
     ) -> None:
         """
         Function to map a shell command to an endpoint.
@@ -114,6 +114,8 @@ class Shell2HTTP(object):
                 decorators=[],
             )
         """
+        if decorators is None:
+            decorators = []
         uri: str = self.__construct_route(endpoint)
         # make sure the given endpoint is not already registered
         cmd_already_exists = self.__commands.get(uri)
