@@ -65,7 +65,7 @@ class Shell2HTTP(object):
         For internal use only.
         """
         if not hasattr(self.app, "extensions"):
-            self.app.extensions = dict()
+            self.app.extensions = {}
 
         self.app.extensions["shell2http"] = self
 
