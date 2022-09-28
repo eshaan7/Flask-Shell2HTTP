@@ -1,6 +1,8 @@
 [run]
 branch = True
-source = flask_shell2http
+parallel = True
+source = 
+    flask_shell2http
 omit = 
     examples/*
 
@@ -13,4 +15,3 @@ exclude_lines =
 ignore_errors = True
 omit =
     examples/*
-    tests/*
