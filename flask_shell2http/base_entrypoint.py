@@ -13,7 +13,7 @@ from .helpers import get_logger
 logger = get_logger()
 
 
-class Shell2HTTP(object):
+class Shell2HTTP:
     """
     Flask-Shell2HTTP base entrypoint class.
     The only public API available to users.
