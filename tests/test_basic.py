@@ -7,7 +7,8 @@ from tests._utils import CustomTestCase, get_req_keys, post_req_keys
 class TestBasic(CustomTestCase):
     uri = "/cmd/echo"
 
-    def create_app(self):
+    @staticmethod
+    def create_app():
         app.config["TESTING"] = True
         shell2http.register_command(endpoint="sleep", command_name="sleep")
         return app

@@ -5,7 +5,8 @@ from tests._utils import CustomTestCase
 class TestDeletion(CustomTestCase):
     uri = "/sleep"
 
-    def create_app(self):
+    @staticmethod
+    def create_app():
         app.config["TESTING"] = True
         return app
 
