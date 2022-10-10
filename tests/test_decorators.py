@@ -7,7 +7,8 @@ class TestDecorators(CustomTestCase):
     private_uri = "/cmd/protected/echo"
     uri = public_uri  # default
 
-    def create_app(self):
+    @staticmethod
+    def create_app():
         app.config["TESTING"] = True
         return app
 

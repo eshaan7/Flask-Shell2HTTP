@@ -8,7 +8,8 @@ from tests._utils import CustomTestCase
 class TestMultipleFiles(CustomTestCase):
     uri = "/cmd/strings"
 
-    def create_app(self):
+    @staticmethod
+    def create_app():
         app.config["TESTING"] = True
         return app
 
