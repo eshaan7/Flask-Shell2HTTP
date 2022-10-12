@@ -1,7 +1,3 @@
-[![Get Support](https://xscode.com/assets/promo-banner.svg)](https://xscode.com/eshaan7/Flask-Shell2HTTP)
-
-_For urgent issues and priority support, visit [https://xscode.com/eshaan7/flask-shell2http](https://xscode.com/eshaan7/flask-shell2http)._
-
 # Flask-Shell2HTTP
 
 [![flask-shell2http on pypi](https://img.shields.io/pypi/v/flask-shell2http)](https://pypi.org/project/Flask-Shell2HTTP/)
