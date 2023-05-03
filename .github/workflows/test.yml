@@ -8,6 +8,8 @@ on:
 
 jobs:
   test:
+    env:
+      DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
@@ -17,7 +19,6 @@ jobs:
         include:
           - python-version: 3.6
             os: ubuntu-20.04
-
     steps:
     - uses: actions/checkout@v2
       with:
