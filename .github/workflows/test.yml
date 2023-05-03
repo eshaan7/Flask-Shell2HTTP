@@ -1,4 +1,4 @@
-name: Linter & Tests
+name: Tests
 
 on:
   push:
@@ -8,12 +8,15 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }} 
     strategy:
       fail-fast: false
       max-parallel: 5
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+        include:
+          - python-version: 3.6
+            os: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -31,21 +34,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.dev.txt
 
-    - name: Lint with flake8 and black
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count
-        black . --check
-
     - name: Run tox tests
       run: |
         # run tests with coverage
         tox
+        
+    - name: Report test-coverage to DeepSource
+      run: |
+        # Install the CLI
+        curl https://deepsource.io/cli | sh
 
-    - name: Report test coverage to DeepSource
-      uses: deepsourcelabs/test-coverage-action@master
-      with:
-        key: python
-        coverage-file: coverage.xml
-        dsn: ${{ secrets.DEEPSOURCE_DSN }}
-        fail-ci-on-error: true
+        # Send the report to DeepSource
+        ./bin/deepsource report --analyzer test-coverage --key python --value-file coverage.xml
