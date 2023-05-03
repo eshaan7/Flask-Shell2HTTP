@@ -41,9 +41,9 @@ jobs:
         tox
 
     - name: Report test-coverage to DeepSource
+      if: ${{ matrix.python-version == '3.10' }}
       run: |
         # Install the CLI
         curl https://deepsource.io/cli | sh
-
         # Send the report to DeepSource
         ./bin/deepsource report --analyzer test-coverage --key python --value-file coverage.xml
