@@ -13,9 +13,9 @@ jobs:
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 6
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
         include:
           - python-version: 3.6
             os: ubuntu-20.04
@@ -41,7 +41,7 @@ jobs:
         tox
 
     - name: Report test-coverage to DeepSource
-      if: ${{ matrix.python-version == '3.10' }}
+      if: ${{ matrix.python-version == '3.11' }}
       run: |
         # Install the CLI
         curl https://deepsource.io/cli | sh
