@@ -3,6 +3,6 @@ coverage
 tox
 tox-gh-actions
 
-black==22.3.0
+black==24.3.0
 flake8==3.8.4
 pre-commit==2.9.2
