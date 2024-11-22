@@ -99,7 +99,7 @@ class RunnerParser:
         key: Optional[str] = future.result().get("key", None)
         if not key:
             return None
-        tmpdir: Optional[str] = self.__tmpdirs.get(key, None)
+        tmpdir: Optional[str] = self.__tmpdirs.get(key)
         if not tmpdir:
             return None
 
