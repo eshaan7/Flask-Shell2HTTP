@@ -17,7 +17,7 @@ A minimalist Flask_ extension that serves as a RESTful/HTTP wrapper for python's
 
 **Use Cases:**
 
-- Set a script that runs on a succesful POST request to an endpoint of your choice.
+- Set a script that runs on a successful POST request to an endpoint of your choice.
 - Map a base command to an endpoint and pass dynamic arguments to it.
 - Can also process multiple uploaded files in one command.
 - This is useful for internal docker-to-docker communications if you have different binaries distributed in micro-containers.
